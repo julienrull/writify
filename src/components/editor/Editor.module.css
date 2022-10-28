@@ -1,0 +1,26 @@
+.Container{
+    width: 100%;
+    height: 100%;
+}
+
+.Commands{
+    width: 100%;
+    height: 10%;
+    background-color: gray;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+.Editor{
+    background-color: white;
+    width: 100%;
+    height: 90%;
+    outline: none;
+    overflow-y: scroll;
+    box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    padding: 50px;
+}
