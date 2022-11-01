@@ -1,0 +1,58 @@
+body{
+  --sidebar: 50%;
+}
+
+.Container{
+  --sidebarClamped: clamp(300px, var(--sidebar), calc(100% - 300px));
+  background-color: black;
+  display: grid;
+  grid-template-columns: var(--sidebarClamped) 1fr;
+  height: 100%;
+  width: 100%;
+}
+
+.First{
+  position: relative;
+  background-color: aqua;
+  overflow: hidden;
+}
+
+.Resizer{
+  position: absolute;
+  height: 100%;
+  width: 20px;
+  top: 0;
+  right: -10px;
+  cursor: ew-resize;
+  touch-action: none;
+}
+
+.Resizer::after{
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  background-color: coral;
+  opacity: 0;
+  transform: scaleX(0);
+  transition: .3s;
+}
+
+.Resizer:hover::after{
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  background-color: coral;
+  transform: scaleX(0.2);
+  opacity: 1;
+}
+
+.Second{
+  background-color: azure;
+  overflow: hidden;
+}

@@ -1,11 +1,10 @@
-import logo from './logo.svg';
 import styles from './App.module.css';
-import Editor from './components/editor/Editor';
+import Panel from './components/Panel/Panel';
 
 function App() {
   return (
     <div class={styles.App}>
-      <Editor/>
+      <Panel/>
     </div>
   );
 }
