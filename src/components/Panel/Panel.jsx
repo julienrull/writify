@@ -1,12 +1,25 @@
 import styles from './Panel.module.css';
 import Editor from './../editor/Editor'
-import { onMount } from "solid-js";
+import { onMount, createSignal } from "solid-js";
 
-function Panel() {
+const SIDEBAR_WIDTH = 'SidebarWith';
 
+const Direction = {
+    "HORIZONTAL": 0,
+    "VERTICAL": 1,
+    "NO_SPLIT": 2
+}
+
+
+
+
+function Panel(props) {
+
+    const [directionStatus, setDirectionStatus] = createSignal(Direction[props.direction] !== undefined ? Direction[props.direction] : Direction.HORIZONTAL);
+
+    let container;
     let resizer;
-
-    const SIDEBAR_WIDTH = 'SidebarWith';
+    
 
     function rafThrottle(callback) {
         let requestId = null
@@ -48,29 +61,35 @@ function Panel() {
 
         function onPointerMove(e){
             e.preventDefault();
-            cb(e.pageX);
+            let position = 0;
+            if (Direction[props.direction] === Direction.HORIZONTAL) {
+                position = e.pageX - container.offsetLeft
+            }
+            else if(Direction[props.direction] === Direction.VERTICAL){
+                position = e.pageY - container.offsetTop
+            }
+            cb(position);
         }
     }
 
     onMount(() => {
         const oldSidebarWith = sessionStorage.getItem(SIDEBAR_WIDTH);
         if(oldSidebarWith != null) {
-            document.body.style.setProperty('--sidebar', oldSidebarWith);
+            container.style.setProperty('--sidebar', oldSidebarWith);
         }
         resize(resizer, rafThrottle( function(x) {
             const SidebarWith = x + 'px';
             sessionStorage.setItem(SIDEBAR_WIDTH, SidebarWith);
-            document.body.style.setProperty('--sidebar', SidebarWith);
+            container.style.setProperty('--sidebar', SidebarWith);
         }));
     });
-
     return (
-        <div class={styles.Container}>
+        <div ref={container} classList={{[styles.Container]: true, [styles.Horizontal]: Direction[props.direction] === Direction.HORIZONTAL, [styles.Vertical]: Direction[props.direction] === Direction.VERTICAL, [styles.NoSplit]: Direction[props.direction] === Direction.NO_SPLIT}}>
             <div class={styles.First}>
                 <Editor/>
-                <div ref={resizer} class={styles.Resizer}></div>
+                <div ref={resizer} classList={{[styles.Resizer]: true, [styles.ResizerHorizontal]: Direction[props.direction]=== Direction.HORIZONTAL, [styles.ResizerVertical]: Direction[props.direction] === Direction.VERTICAL}}></div>
             </div>
-            <div class={styles.Second}>
+            <div classList={{[styles.Second]: true, [styles.NoSplit]: Direction[props.direction] === Direction.NO_SPLIT}}>
                 <Editor/>
             </div>
         </div>

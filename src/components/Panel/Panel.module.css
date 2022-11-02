@@ -1,33 +1,61 @@
-body{
-  --sidebar: 50%;
-}
 
+/* CONTAINER */
 .Container{
+  --sidebar: 50%;
   --sidebarClamped: clamp(300px, var(--sidebar), calc(100% - 300px));
   background-color: black;
   display: grid;
-  grid-template-columns: var(--sidebarClamped) 1fr;
   height: 100%;
   width: 100%;
 }
 
+.Horizontal {
+  grid-template-columns: var(--sidebarClamped) 1fr;
+}
+
+.Vertical {
+  grid-template-rows: var(--sidebarClamped) 1fr;
+}
+
+.NoSplit > .Second {
+  display: none;
+}
+
+
+/* CHILDREN */
 .First{
   position: relative;
   background-color: aqua;
   overflow: hidden;
 }
 
+.Second{
+  background-color: azure;
+  overflow: hidden;
+}
+
+/* RESIZER */
 .Resizer{
   position: absolute;
+  touch-action: none;
+}
+
+.ResizerHorizontal{
   height: 100%;
   width: 20px;
   top: 0;
   right: -10px;
   cursor: ew-resize;
-  touch-action: none;
 }
 
-.Resizer::after{
+.ResizerVertical{
+  height: 20px;
+  width: 100%;
+  Bottom: -10px;
+  cursor: ns-resize;
+}
+
+.ResizerHorizontal::after{
   content: '';
   position: absolute;
   top: 0;
@@ -40,7 +68,22 @@ body{
   transition: .3s;
 }
 
-.Resizer:hover::after{
+.ResizerVertical::after{
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  background-color: coral;
+  opacity: 0;
+  transform: scaleY(0);
+  transition: .3s;
+}
+
+
+
+.ResizerHorizontal:hover::after{
   content: '';
   position: absolute;
   top: 0;
@@ -52,7 +95,14 @@ body{
   opacity: 1;
 }
 
-.Second{
-  background-color: azure;
-  overflow: hidden;
+.ResizerVertical:hover::after{
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  background-color: coral;
+  transform: scaleY(0.2);
+  opacity: 1;
 }
