@@ -1,6 +1,37 @@
 import styles from './Editor.module.css';
+import { Accessor, createSignal, For, onMount } from 'solid-js';
+import {File, FileStruct} from '../File/File';
+
+
+
+
 
 function Editor() {
+
+    let filesContainer: HTMLDivElement = document.createElement('div');
+    let activeFileContent: HTMLDivElement = document.createElement('div');
+
+    const [files, setFiles] = createSignal<FileStruct[]>([
+        {
+            "title": "Rapport",
+            "content": "Hello Zabio I'm a Rapport",
+            "active": true
+        },
+        {
+            "title": "Notes",
+            "content": "Je suis une note",
+            "active": false
+        },
+        {
+            "title": "ZABI",
+            "content": "ZABIIIIIIIII",
+            "active": false
+        }
+    ]);
+
+    onMount(()=> {
+        activeFileContent.innerHTML = files().filter((fs: FileStruct) => fs.active)[0].content;
+    });
 
     const toggleStyle = function(e: MouseEvent) {
         e.preventDefault();
@@ -8,40 +39,63 @@ function Editor() {
         document.execCommand(element.id);
     }
 
+    function onPaste(e: ClipboardEvent){
+        e.preventDefault()
+        var text = e.clipboardData?.getData('text/plain')
+        document.execCommand('insertText', false, text)
+    }
+
+    function onWheel(e: WheelEvent){
+        e.preventDefault();
+        filesContainer != null ? filesContainer.scrollLeft += e.deltaY : filesContainer;
+    }
+
+    function switchFile(file: FileStruct){
+        activeFileContent.innerHTML = file.content;
+        setFiles((old: FileStruct[]) => {
+        return old.map((fs: FileStruct) => {
+                let fsCopied = {...fs};
+                fsCopied.active = fsCopied.title === file.title;
+                return fsCopied;
+            });
+        });
+    }
+    function onFileClose(file: FileStruct) {
+        let wasActive = false;
+        let oldIndex = -1;
+        setFiles((old: FileStruct[]) => {
+            return old.filter((fs: FileStruct, i: number) => {
+                if (fs.title === file.title){
+                    wasActive = fs.active;
+                    oldIndex = i;
+                } 
+                return fs.title !== file.title;
+            });
+        });
+        if(wasActive){
+            setFiles((old: FileStruct[]) => {
+                return old.map((fs: FileStruct, i: number) => {
+                    if (i === oldIndex) {
+                        fs.active = true;
+                        activeFileContent.innerHTML = fs.content;
+                    }else if(i === old.length - 1){
+                        activeFileContent.innerHTML = fs.content;
+                    }
+                    return {...fs};
+                });
+            });
+        }
+    }
+
+
     return (
         <div class={styles.Container}>
-            <div class={styles.Commands}>
-                <button id="bold" onClick={toggleStyle}><b>B</b></button>
-                <button id="italic" onClick={toggleStyle}><i>I</i></button>
-                <button id="underline" onClick={toggleStyle}><u>U</u></button>
-                <button id="strikeThrough" onClick={toggleStyle}><s>S</s></button>
-                <button id="justifyLeft" onClick={toggleStyle}>L</button>
-                <button id="justifyRight" onClick={toggleStyle}>R</button>
-                <button id="justifyCenter" onClick={toggleStyle}>C</button>
-                <button id="justifyFull" onClick={toggleStyle}>J</button>
-                <select name="heading" id="heading">
-                    <option value="H1">H1</option>
-                    <option value="H2">H2</option>
-                    <option value="H3">H3</option>
-                </select>
-                <select name="font" id="font">
-                    <option value="Arial">Arial</option>
-                    <option value="Open-sans">Open-sans</option>
-                </select>
-                <select name="size" id="size">
-                    <option value="8">8</option>
-                    <option value="9">9</option>
-                    <option value="10">10</option>
-                    <option value="11">11</option>
-                    <option value="12">12</option>
-                </select>
-                <div>
-                    <input type="color" id="head" name="head"
-                        value="#e66465"/>
-                    <label for="head">Font color</label>
-                </div>
+            <div ref={filesContainer} onWheel={onWheel} class={styles.Files}>
+                <For each={files()}>
+                    {(item: FileStruct, index: Accessor<number>) => <File fileStruct={item} onFileClose={onFileClose} onFileClick={switchFile}/>}
+                </For>
             </div>
-            <div class={styles.Editor} contentEditable={true}></div>
+            <div ref={activeFileContent} onPaste={onPaste} class={styles.Editor} contentEditable={true}></div>
         </div>
 
         

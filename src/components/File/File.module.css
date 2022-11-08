@@ -1,0 +1,40 @@
+.File{
+    min-width: 100px;
+    height: 37px;
+    color: #E6E6E6;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    user-select: none;
+}
+
+.FileSelected{
+    border-bottom: solid 1px aqua;
+}
+
+.FileSelected > .FileCloseIcon{
+    opacity: 1 !important;
+}
+
+.FileCloseIcon{
+    opacity: 0;
+    margin-left: 10px;
+    width: 24px;
+    height: 24px;
+    padding: 3px;
+    border-radius: 3px;
+    box-sizing: border-box;
+    padding: 7px;
+}
+
+.FileCloseIcon:hover{
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.File:hover .FileCloseIcon{
+    opacity: 0.3;
+}
+
+.FileTitle{
+    padding-left: 15px;
+}

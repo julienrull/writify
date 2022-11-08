@@ -6,7 +6,7 @@
 .ButtonDirection{
     position: absolute;
     z-index: 999;
-    top: 10px;
+    top: 50px;
     left: 10px;
     width: 30px;
     height: 30px;

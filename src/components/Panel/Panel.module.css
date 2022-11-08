@@ -2,7 +2,7 @@
 /* CONTAINER */
 .Container{
   --sidebar: 50%;
-  --sidebarClamped: clamp(100px, var(--sidebar), calc(100% - 100px));
+  --sidebarClamped: clamp(200px, var(--sidebar), calc(100% - 200px));
   background-color: black;
   display: grid;
   height: 100%;
@@ -27,6 +27,8 @@
   position: relative;
   background-color: aqua;
   overflow: hidden;
+  border-right: 1px solid black;
+  border-bottom: 1px solid black;
 }
 
 .Second{
@@ -38,7 +40,6 @@
 .Resizer{
   position: absolute;
   touch-action: none;
-  background-color: black;
 }
 
 .ResizerHorizontal{
