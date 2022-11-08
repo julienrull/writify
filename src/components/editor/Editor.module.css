@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css?family=Open+Sans');
+
 .Container{
     width: 100%;
     height: 100%;
@@ -23,7 +25,6 @@
     overflow-x: hidden;
     overflow-y: hidden;
     pointer-events:all;
-    mouse-wheel:horizontal;
 }
 
 .Files:hover{
@@ -58,11 +59,10 @@
 .Editor{
     background-color: #272727;
     font-size: 27px;
-    text-align: justify;
     font-family: "Open Sans";
     color: #E6E6E6;
     max-width: 100%;
-    height: 100%;
+    height: calc(100% - 40px);
     outline: none;
     overflow-y: auto;
     overflow-x: hidden;
@@ -72,6 +72,8 @@
     padding: 100px;
     transition: background-color 0.3s;
     text-rendering: optimizeSpeed;
+    word-wrap: break-word;
+    word-spacing: normal;
 }
 
 .Editor::-webkit-scrollbar{

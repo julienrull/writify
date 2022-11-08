@@ -2,7 +2,7 @@
 /* CONTAINER */
 .Container{
   --sidebar: 50%;
-  --sidebarClamped: clamp(200px, var(--sidebar), calc(100% - 200px));
+  --sidebarClamped: clamp(33.33%, var(--sidebar), calc(100% - 33.33%));
   background-color: black;
   display: grid;
   height: 100%;
