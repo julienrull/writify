@@ -3,6 +3,7 @@
 .Container{
     width: 100%;
     height: 100%;
+    position: relative;
 }
 
 .Commands{
@@ -25,6 +26,7 @@
     overflow-x: hidden;
     overflow-y: hidden;
     pointer-events:all;
+    z-index: 0;
 }
 
 .Files:hover{
@@ -52,6 +54,57 @@
 
 .Files::-webkit-scrollbar-track {
     background: transparent;
+}
+
+ .FilesHover {
+    width: 100%;
+    height: 40px;
+    background-color: rgba(255, 255, 255, 0.1);
+    opacity: 0;
+}
+
+.FilesHoverAvtive {
+    opacity: 1;
+}
+
+.OverlapContainer{
+    position: absolute;
+    top: 40px;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    overflow: hidden;
+}
+
+.OverlapContainer::after{
+    content: '';
+    position: absolute;
+    background-color: rgba(255, 255, 255, 0.1);
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    transform: scale(100%, 50%) translate(0%, -50%);
+    transition: transform 0.1s linear;
+}
+
+
+
+.Right::after{
+    transform: scale(50%, 100%) translate(50%, 0%);
+}
+.Left::after{
+    transform: scale(50%, 100%) translate(-50%, 0%);
+}
+.Top::after{
+    transform: scale(100%, 50%) translate(0%, -50%);
+}
+.Bottom::after{
+    transform: scale(100%, 50%) translate(0%, 50%);
+}
+.Full::after{
+    transform: scale(100%, 100%) translate(0%, 0%);
 }
 
 

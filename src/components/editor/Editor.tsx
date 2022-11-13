@@ -1,5 +1,5 @@
 import styles from './Editor.module.css';
-import { Accessor, Component, createSignal, For, onMount } from 'solid-js';
+import { Accessor, Component, createSignal, For, onMount, createEffect } from 'solid-js';
 import { File, FileStruct } from '../File/File';
 
 
@@ -8,9 +8,20 @@ export interface EditorStruct {
     files: FileStruct[];
 }
 
+interface OverLayout {
+    OverlapContainer: boolean;
+    Left: boolean;
+    Right: boolean;
+    Top: boolean;
+    Bottom: boolean;
+    Full: boolean;
+}
+
 interface EditorProps {
     editorStructure: EditorStruct;
     onSetFile: (editorId: string, files: FileStruct[]) => void;
+    onFileClose: (editorId: string, files: FileStruct) => void;
+    onTansferFile: (fileName: string, sourceEditorId: string, targetEditorId: string) => void;
 }
 
 
@@ -18,33 +29,36 @@ const Editor: Component<EditorProps> = (props) => {
 
     let filesContainer: HTMLDivElement = document.createElement('div');
     let activeFileContent: HTMLDivElement = document.createElement('div');
+    let overlapElement: HTMLDivElement = document.createElement('div');
 
-    const [files, setFilesArray] = createSignal<FileStruct[]>(props.editorStructure.files);
+    const [filesHover, setFilesHover] = createSignal(false);
 
-    onMount(()=> {
-        activeFileContent.innerHTML = files().filter((fs: FileStruct) => fs.active)[0].content;
+    let [overLayout, setOverLayout] = createSignal<OverLayout>({
+        "OverlapContainer": false,
+        "Left": false,
+        "Right": false,
+        "Top": false,
+        "Bottom": false,
+        "Full": false
     });
 
-    function setFiles(files: FileStruct[]) {
+    onMount(()=> {
+        let activeFile = getActiveFile(); 
+        activeFileContent.innerHTML = activeFile ? activeFile.content : '';
+    });
+
+    createEffect(() => {
+        let activeFile = getActiveFile(); 
+        activeFileContent.innerHTML = activeFile ? activeFile.content : '';
+    });
+
+    function setFiles(filesStructs: FileStruct[]) {
         console.log("click");
-        props.onSetFile(props.editorStructure.id, files);
-        /*
-        setFilesArray((old: FileStruct[]) => {
-            return old.map((fs1: FileStruct) => {
-                let newFs = fs1;
-                files.forEach((fs2) => {
-                    if(fs1.title === fs2.title){
-                        newFs = {...fs1};
-                    }
-                });
-                return newFs;
-            });
-        });
-        */
+        props.onSetFile(props.editorStructure.id, filesStructs);
     }
 
     function getActiveFile(): FileStruct {
-        return files().filter((fs: FileStruct) => fs.active)[0];
+        return props.editorStructure.files.filter((fs: FileStruct) => fs.active)[0];
     }
 
     const toggleStyle = function(e: MouseEvent) {
@@ -76,56 +90,145 @@ const Editor: Component<EditorProps> = (props) => {
     }
 
     function onFileClose(file: FileStruct) {
-        let wasActive = false;
-        let oldIndex = -1;
-        setFilesArray((old: FileStruct[]) => {
-            return old.filter((fs: FileStruct, i: number) => {
-                if (fs.title === file.title){
-                    wasActive = fs.active;
-                    oldIndex = i;
-                } 
-                return fs.title !== file.title;
-            });
-        });
-        if(wasActive){
-            setFilesArray((old: FileStruct[]) => {
-                return old.map((fs: FileStruct, i: number) => {
-                    if(oldIndex > old.length - 1){
-                        if (i === old.length - 1) {
-                            fs.active = true;
-                            activeFileContent.innerHTML = fs.content;
-                        }
-                    }else{
-                        if (i === oldIndex) {
-                            fs.active = true;
-                            activeFileContent.innerHTML = fs.content;
-                        }
-                    }
-                    return {...fs};
-                });
-            });
-            if(files().length === 0) {
-                activeFileContent.innerHTML = '';
-            }
-        }
+        props.onFileClose(props.editorStructure.id, file);
     }
 
     function onFileDrag(e: DragEvent) {
-        console.log("drag function from editor");
-        /*
-        if(e.dataTransfer && e.currentTarget) {
-            const el = e.currentTarget as HTMLInputElement
-            e.dataTransfer.effectAllowed = "move"
-            //e.dataTransfer.setData("sourceEditor", activeFileContent.id);
-            e.dataTransfer.setData("title", files().title);
+        console.log("DRAG !");
+        if(e.dataTransfer) {
+            e.dataTransfer.setData("editorId", props.editorStructure.id);
         }
-        */
+    }
+
+    function onFileOver(e: DragEvent) {
+        console.log("OVER !");
+        let overlapRect = overlapElement.getBoundingClientRect();
+        let positionX = e.pageX - overlapRect.left;
+        let positionY = e.pageY - overlapRect.top;
+        let division = 5;
+        let state = {
+            "OverlapContainer": true,
+            "Left": false,
+            "Right": false,
+            "Top": false,
+            "Bottom": false,
+            "Full": false
+        };
+        if(positionX >= overlapRect.width / division &&  positionX <= (overlapRect.width / division) * (division - 1) && positionY >= overlapRect.height / division &&  positionY <= (overlapRect.height / division) * (division - 1)){
+            state.Full = true;
+        }else if(positionX >= overlapRect.width / division &&  positionX <= (overlapRect.width / division) * (division - 1) && positionY <= overlapRect.height / division) {
+            state.Top = true;
+        }else if(positionX >= overlapRect.width / division &&  positionX <= (overlapRect.width / division) * (division - 1) && positionY >= (overlapRect.height / division) * (division - 1)) {
+            state.Bottom = true;
+        }else if(positionX <= overlapRect.width / 2) {
+            state.Left = true;
+        }else {
+            state.Right = true;
+            console.log("Right");
+        }
+        setOverLayout((old: OverLayout) => {
+            return {
+                ...old,
+                ...state
+            }
+        });
+        
+        e.preventDefault();
+    }
+
+    function onDragLeave(e: DragEvent){
+        console.log("LEAVE !");
+        if(overLayout().OverlapContainer){
+            setOverLayout((old: OverLayout) => {
+                return {
+                    ...old,
+                    ...{
+                        "OverlapContainer": false,
+                        "Left": false,
+                        "Right": false,
+                        "Top": false,
+                        "Bottom": false,
+                        "Full": false
+                    }
+                }
+            });
+        }
+        e.preventDefault();
+    }
+
+    function onFileDrop(e: DragEvent) {
+        console.log("DROP !");
+        if (overLayout().Full) {
+            if(e.dataTransfer){
+                let title = e.dataTransfer.getData("title");
+                let editorId = e.dataTransfer.getData("editorId");
+                if(editorId !== props.editorStructure.id){
+                    props.onTansferFile(title, editorId, props.editorStructure.id);
+                }
+            }
+        }
+        setOverLayout((old: OverLayout) => {
+            return {
+                ...old,
+                ...{
+                    "OverlapContainer": false,
+                    "Left": false,
+                    "Right": false,
+                    "Top": false,
+                    "Bottom": false,
+                    "Full": false
+                }
+            }
+        });
+        e.stopPropagation();
+        e.preventDefault();
+    }
+
+    function onFileDragEnd(e: DragEvent){
+        console.log("END !");
+        setOverLayout((old: OverLayout) => {
+            return {
+                ...old,
+                ...{
+                    "OverlapContainer": false,
+                    "Left": false,
+                    "Right": false,
+                    "Top": false,
+                    "Bottom": false,
+                    "Full": false
+                }
+            }
+        });
+        setFilesHover(false);
+        e.preventDefault();
+    }
+
+    function onFilesDragHover(e: DragEvent) {
+        setFilesHover(true);
+        e.preventDefault();
+    }
+
+    function onFilesDragleave(e: DragEvent) {
+        setFilesHover(false);
+        e.preventDefault();
+    }
+
+    function onFilesDragDrop(e: DragEvent) {
+        setFilesHover(false);
+        if(e.dataTransfer){
+            let title = e.dataTransfer.getData("title");
+            let editorId = e.dataTransfer.getData("editorId");
+            if(editorId !== props.editorStructure.id){
+                props.onTansferFile(title, editorId, props.editorStructure.id);
+            }
+        }
+        e.preventDefault();
     }
 
     return (
-        <div class={styles.Container}>
-            <div ref={filesContainer} onWheel={onWheel} class={styles.Files}>
-                <For each={files()}>
+        <div onDragEnd={onFileDragEnd} class={styles.Container}>
+            <div ref={filesContainer} onWheel={onWheel} classList={{[styles.Files]: true}}>
+                <For each={props.editorStructure.files}>
                     {(item: FileStruct, index: Accessor<number>) => <File 
                         draggable={true} 
                         fileStruct={item} 
@@ -134,8 +237,11 @@ const Editor: Component<EditorProps> = (props) => {
                         onFileMouseDown={switchFile}
                     />}
                 </For>
+                <div onDragOver={onFilesDragHover} onDrop={onFilesDragDrop} ondragleave={onFilesDragleave} classList={{[styles.FilesHover]: true, [styles.FilesHoverAvtive]: filesHover()}}></div>
             </div>
-            <div ref={activeFileContent} onPaste={onPaste} class={styles.Editor} contentEditable={true}></div>
+            <div ref={overlapElement} onDragOver={onFileOver} onDrop={onFileDrop} ondragleave={onDragLeave} classList={{[styles.OverlapContainer]: overLayout().OverlapContainer, [styles.Full]: overLayout().Full, [styles.Bottom]: overLayout().Bottom, [styles.Top]: overLayout().Top, [styles.Left]: overLayout().Left, [styles.Right]: overLayout().Right}}>
+            </div>
+            <div onDragOver={onFileOver} ref={activeFileContent} onPaste={onPaste} class={styles.Editor} contentEditable={true}></div>
         </div>
     );
 }
