@@ -1,6 +1,6 @@
 import styles from './File.module.css'
 import crossWhite from '../../assets/close_white.png';
-import { Component, createEffect, createSignal } from 'solid-js';
+import { Component, createSignal } from 'solid-js';
 
 export interface FileStruct {
     title: string;
@@ -12,7 +12,8 @@ interface FileProps {
     fileStruct: FileStruct;
     onFileMouseDown?: (file: FileStruct) => void;
     onFileClose?: (file: FileStruct) => void;
-    onFileDrag?: (event: DragEvent) => void;
+    onFileDragStart?: (event: DragEvent) => void;
+    onFileDrop?: (event: DragEvent, targetFileName: string) => void;
     draggable?: boolean;
 }
 const File: Component<FileProps>= (props) => {
@@ -26,16 +27,19 @@ const File: Component<FileProps>= (props) => {
     }
 
     function onClose(e: MouseEvent) {
-        e.stopPropagation();
         props.onFileClose ? props.onFileClose(props.fileStruct) : undefined;
+        e.stopPropagation();
     }
 
     function onDragStart(e: DragEvent) {
         if(e.dataTransfer) {
             e.dataTransfer.effectAllowed = "move"
-            e.dataTransfer.setData("title", props.fileStruct.title);
+            let data = {
+                sourceFileName : props.fileStruct.title
+            }
+            e.dataTransfer.setData("text/plain", JSON.stringify(data));
         }
-        props.onFileDrag ? props.onFileDrag(e) : undefined;
+        props.onFileDragStart ? props.onFileDragStart(e) : undefined;
     }
 
     function onDragHover(e: DragEvent) {
@@ -51,6 +55,9 @@ const File: Component<FileProps>= (props) => {
 
     function onDragDrop(e: DragEvent) {
         setHover(false);
+        if(e.dataTransfer) {
+            props.onFileDrop ? props.onFileDrop(e, props.fileStruct.title) : undefined;
+        }
         e.preventDefault();
     }
 

@@ -3,6 +3,7 @@ import { Component, createSignal } from "solid-js";
 import {Editor, EditorStruct} from '../editor/Editor';
 import { Direction, Panel } from "../Panel/Panel";
 import { FileStruct } from '../File/File';
+import { changeElementPosition } from '../../helpers/ToolsArray';
 
 const Supervisor: Component = () => {
 
@@ -49,6 +50,20 @@ const Supervisor: Component = () => {
     }]);
 
     let [direction, setDirection] = createSignal<Direction>(Direction.HORIZONTAL);
+
+    function getEditor(id: string): EditorStruct {
+        return editors().filter(editor => editor.id === id)[0];
+    }
+    function setEditor(editors: EditorStruct[], editor: EditorStruct): EditorStruct[] {
+        let newEditors = editors.map((edit) => {
+            let newEditor = edit;
+            if(edit.id === editor.id){
+                newEditor = {...editor}
+            }
+            return newEditor;
+        });
+        return newEditors;
+    }
 
     function closeFile(old: EditorStruct[], editorId: string, file: FileStruct): EditorStruct[]{
         let editor: EditorStruct = old[parseInt(editorId)];
@@ -135,20 +150,59 @@ const Supervisor: Component = () => {
     }
 
     function transferFile(fileName: string, sourceEditorId: string, targetEditorId: string) {
-        console.log(fileName, sourceEditorId, targetEditorId);
         setEditorsArray((old: EditorStruct[]) => {
             let tempFile= getFile(fileName, sourceEditorId);
+            console.log(sourceEditorId, targetEditorId)
             let newUpdateEditors = closeFile(old, sourceEditorId, tempFile);
             newUpdateEditors = addFile(newUpdateEditors, targetEditorId, tempFile);
             return newUpdateEditors;
         });
     }
 
+    function changeFilePosition(sourceFileName: string, 
+                                targetFileName: string, 
+                                sourceEditorId: string, 
+                                targetEditorId: string) {
+        setEditorsArray((old: EditorStruct[]) => {
+            let newEditors = old;
+            if(sourceEditorId === targetEditorId){
+                let editor = getEditor(sourceEditorId);
+                const sourceFile = getFile(sourceFileName, sourceEditorId);
+                const targetFile = getFile(targetFileName, sourceEditorId);
+                const sourceIndex = editor.files.indexOf(sourceFile);
+                const targetIndex = editor.files.indexOf(targetFile);
+                //console.log(sourceFileName, targetFileName);
+                //console.log(sourceFile, targetFile);
+                //console.log(sourceIndex, targetIndex);
+                editor.files = changeElementPosition(editor.files, sourceIndex, targetIndex);
+                newEditors = setEditor(old, editor);
+            }else{
+                let targetEditor = getEditor(targetEditorId);
+                const sourceFile = getFile(sourceFileName, sourceEditorId);
+                const targetFile = getFile(targetFileName, targetEditorId);
+                const targetIndex = targetEditor.files.indexOf(targetFile);
+                newEditors = closeFile(old, sourceEditorId, sourceFile);
+                targetEditor.files = targetEditor.files.map((file: FileStruct) => {
+                    let newFile = file;
+                    if(newFile.active){
+                        file.active = false;
+                        newFile = {...file};
+                    }
+                    return newFile;
+                });
+                targetEditor.files.push(sourceFile);
+                targetEditor.files = changeElementPosition(targetEditor.files, targetEditor.files.length - 1, targetIndex);
+                newEditors = setEditor(newEditors, targetEditor);
+            }
+            return newEditors;                                   
+        });
+    }
+
     return (
         <div id={styles.Container}>
             <Panel direction={direction()}> 
-                <Editor onTansferFile={transferFile} onFileClose={onFileClose} onSetFile={setFiles} editorStructure={editors()[0]}/>
-                <Editor onTansferFile={transferFile} onFileClose={onFileClose} onSetFile={setFiles} editorStructure={editors()[1]}/>   
+                <Editor onFileChangePosition={changeFilePosition} onTansferFile={transferFile} onFileClose={onFileClose} onSetFile={setFiles} editorStructure={editors()[0]}/>
+                <Editor onFileChangePosition={changeFilePosition} onTansferFile={transferFile} onFileClose={onFileClose} onSetFile={setFiles} editorStructure={editors()[1]}/>   
             </Panel>
         </div>
     );

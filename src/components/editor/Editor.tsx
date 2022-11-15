@@ -22,6 +22,7 @@ interface EditorProps {
     onSetFile: (editorId: string, files: FileStruct[]) => void;
     onFileClose: (editorId: string, files: FileStruct) => void;
     onTansferFile: (fileName: string, sourceEditorId: string, targetEditorId: string) => void;
+    onFileChangePosition: (sourceFileName: string, targetFileName: string, sourceEditorId: string, targetEditorId: string) => void;
 }
 
 
@@ -93,10 +94,12 @@ const Editor: Component<EditorProps> = (props) => {
         props.onFileClose(props.editorStructure.id, file);
     }
 
-    function onFileDrag(e: DragEvent) {
+    function onFileDragStart(e: DragEvent) {
         console.log("DRAG !");
         if(e.dataTransfer) {
-            e.dataTransfer.setData("editorId", props.editorStructure.id);
+            let data = JSON.parse(e.dataTransfer.getData("text/plain"));
+            data = {...data, targetEditorId: props.editorStructure.id}
+            e.dataTransfer.setData("text/plain", JSON.stringify(data));
         }
     }
 
@@ -160,10 +163,10 @@ const Editor: Component<EditorProps> = (props) => {
         console.log("DROP !");
         if (overLayout().Full) {
             if(e.dataTransfer){
-                let title = e.dataTransfer.getData("title");
-                let editorId = e.dataTransfer.getData("editorId");
+                let data = JSON.parse(e.dataTransfer.getData("text/plain"));
+                let editorId = data.targetEditorId;
                 if(editorId !== props.editorStructure.id){
-                    props.onTansferFile(title, editorId, props.editorStructure.id);
+                    props.onTansferFile(data.sourceFileName, editorId, props.editorStructure.id);
                 }
             }
         }
@@ -216,13 +219,26 @@ const Editor: Component<EditorProps> = (props) => {
     function onFilesDragDrop(e: DragEvent) {
         setFilesHover(false);
         if(e.dataTransfer){
-            let title = e.dataTransfer.getData("title");
-            let editorId = e.dataTransfer.getData("editorId");
-            if(editorId !== props.editorStructure.id){
-                props.onTansferFile(title, editorId, props.editorStructure.id);
+            let data = JSON.parse(e.dataTransfer.getData("text/plain"))
+            let sourceFileName = data.sourceFileName;
+            let sourceEditorId = data.targetEditorId;
+            let targetEditorId = props.editorStructure.id;
+            if(sourceEditorId !== props.editorStructure.id){
+                props.onTansferFile(sourceFileName, sourceEditorId, targetEditorId);
             }
         }
         e.preventDefault();
+    }
+
+    function onFilePositionChange(e: DragEvent, targetFileName: string) {
+        if(e.dataTransfer){
+            let data = JSON.parse(e.dataTransfer.getData("text/plain"));
+            console.log(data)
+            let sourceFileName = data.sourceFileName;
+            let sourceEditorId = data.targetEditorId;
+            let targetEditorId = props.editorStructure.id;
+            props.onFileChangePosition ? props.onFileChangePosition(sourceFileName, targetFileName, sourceEditorId, targetEditorId) : undefined;
+        }
     }
 
     return (
@@ -232,9 +248,10 @@ const Editor: Component<EditorProps> = (props) => {
                     {(item: FileStruct, index: Accessor<number>) => <File 
                         draggable={true} 
                         fileStruct={item} 
-                        onFileDrag={onFileDrag} 
+                        onFileDragStart={onFileDragStart} 
                         onFileClose={onFileClose} 
                         onFileMouseDown={switchFile}
+                        onFileDrop = {onFilePositionChange}
                     />}
                 </For>
                 <div onDragOver={onFilesDragHover} onDrop={onFilesDragDrop} ondragleave={onFilesDragleave} classList={{[styles.FilesHover]: true, [styles.FilesHoverAvtive]: filesHover()}}></div>
