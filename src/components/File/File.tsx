@@ -22,7 +22,7 @@ const File: Component<FileProps>= (props) => {
 
     function onMouseDown(e: MouseEvent) {
         if(e.target === e.currentTarget || e.target instanceof HTMLSpanElement) {
-            props.onFileMouseDown ? props.onFileMouseDown(props.fileStruct) : undefined;
+            props.onFileMouseDown ? props.onFileMouseDown({...props.fileStruct}) : undefined;
         }
     }
 

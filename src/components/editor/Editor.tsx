@@ -54,7 +54,6 @@ const Editor: Component<EditorProps> = (props) => {
     });
 
     function setFiles(filesStructs: FileStruct[]) {
-        console.log("click");
         props.onSetFile(props.editorStructure.id, filesStructs);
     }
 
@@ -80,7 +79,7 @@ const Editor: Component<EditorProps> = (props) => {
     }
 
     function switchFile(file: FileStruct){
-        let activeFile = getActiveFile();
+        let activeFile = {...getActiveFile()};
         if(activeFile.title !== file.title){
             activeFile.content = activeFileContent.innerHTML;
             activeFile.active = false;
@@ -233,7 +232,6 @@ const Editor: Component<EditorProps> = (props) => {
     function onFilePositionChange(e: DragEvent, targetFileName: string) {
         if(e.dataTransfer){
             let data = JSON.parse(e.dataTransfer.getData("text/plain"));
-            console.log(data)
             let sourceFileName = data.sourceFileName;
             let sourceEditorId = data.targetEditorId;
             let targetEditorId = props.editorStructure.id;
