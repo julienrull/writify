@@ -1,6 +1,7 @@
 import styles from './Editor.module.css';
 import { Accessor, Component, createSignal, For, onMount, createEffect } from 'solid-js';
 import { File, FileStruct } from '../File/File';
+import { Direction } from '../Panel/Panel';
 
 
 export interface EditorStruct {
@@ -17,11 +18,11 @@ interface OverLayout {
     Full: boolean;
 }
 
-interface EditorProps {
+export interface EditorProps {
     editorStructure: EditorStruct;
     onSetFile: (editorId: string, files: FileStruct[]) => void;
     onFileClose: (editorId: string, files: FileStruct) => void;
-    onTansferFile: (fileName: string, sourceEditorId: string, targetEditorId: string) => void;
+    onTansferFile: (fileName: string, sourceEditorId: string, targetEditorId: string, position: string) => void;
     onFileChangePosition: (sourceFileName: string, targetFileName: string, sourceEditorId: string, targetEditorId: string) => void;
 }
 
@@ -58,7 +59,7 @@ const Editor: Component<EditorProps> = (props) => {
     }
 
     function getActiveFile(): FileStruct {
-        return props.editorStructure.files.filter((fs: FileStruct) => fs.active)[0];
+        return props.editorStructure?.files.filter((fs: FileStruct) => fs.active)[0];
     }
 
     const toggleStyle = function(e: MouseEvent) {
@@ -160,13 +161,21 @@ const Editor: Component<EditorProps> = (props) => {
 
     function onFileDrop(e: DragEvent) {
         console.log("DROP !");
-        if (overLayout().Full) {
-            if(e.dataTransfer){
-                let data = JSON.parse(e.dataTransfer.getData("text/plain"));
-                let editorId = data.targetEditorId;
-                if(editorId !== props.editorStructure.id){
-                    props.onTansferFile(data.sourceFileName, editorId, props.editorStructure.id);
-                }
+        let position = 'Full';
+        if(overLayout().Left){
+            position = 'Left';
+        }else if(overLayout().Right){
+            position = 'Right';
+        }else if(overLayout().Top){
+            position = 'Top';
+        }else if(overLayout().Bottom){
+            position = 'Bottom';
+        }
+        if(e.dataTransfer){
+            let data = JSON.parse(e.dataTransfer.getData("text/plain"));
+            let editorId = data.targetEditorId;
+            if(editorId !== props.editorStructure.id || (editorId === props.editorStructure.id && position !== 'Full')){
+                props.onTansferFile(data.sourceFileName, editorId, props.editorStructure.id, position);
             }
         }
         setOverLayout((old: OverLayout) => {
@@ -223,7 +232,7 @@ const Editor: Component<EditorProps> = (props) => {
             let sourceEditorId = data.targetEditorId;
             let targetEditorId = props.editorStructure.id;
             if(sourceEditorId !== props.editorStructure.id){
-                props.onTansferFile(sourceFileName, sourceEditorId, targetEditorId);
+                props.onTansferFile(sourceFileName, sourceEditorId, targetEditorId, 'Full');
             }
         }
         e.preventDefault();
@@ -242,7 +251,7 @@ const Editor: Component<EditorProps> = (props) => {
     return (
         <div onDragEnd={onFileDragEnd} class={styles.Container}>
             <div ref={filesContainer} onWheel={onWheel} classList={{[styles.Files]: true}}>
-                <For each={props.editorStructure.files}>
+                <For each={props.editorStructure?.files}>
                     {(item: FileStruct, index: Accessor<number>) => <File 
                         draggable={true} 
                         fileStruct={item} 

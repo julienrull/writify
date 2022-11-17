@@ -3,6 +3,7 @@
  * @param targetArray array concerned by changes
  * @param source index of the original position
  * @param target index of the new position in the array
+ * @return Reorganized array
  */
  export function changeElementPosition(
     targetArray: any[],

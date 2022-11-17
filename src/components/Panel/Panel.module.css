@@ -1,8 +1,8 @@
 
 /* CONTAINER */
-.Container{
+.PanelContainer{
   --sidebar: 50%;
-  --sidebarClamped: clamp(33.33%, var(--sidebar), calc(100% - 33.33%));
+  --sidebarClamped: clamp(10%, var(--sidebar), calc(100% - 10%));
   background-color: black;
   display: grid;
   height: 100%;
@@ -27,8 +27,6 @@
   position: relative;
   background-color: aqua;
   overflow: hidden;
-  border-right: 1px solid black;
-  border-bottom: 1px solid black;
 }
 
 .Second{
@@ -50,11 +48,19 @@
   cursor: ew-resize;
 }
 
+.BorderRight{
+  border-right: 1px solid black;
+}
+
 .ResizerVertical{
   height: 20px;
   width: 100%;
   Bottom: -10px;
   cursor: ns-resize;
+}
+
+.BorderBottom{
+  border-bottom: 1px solid black;
 }
 
 .ResizerHorizontal::after{
