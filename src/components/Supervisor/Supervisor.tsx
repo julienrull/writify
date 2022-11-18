@@ -67,7 +67,7 @@ const Supervisor: Component = () => {
     ]);
 
     const [layout, setLayout] = createStore<Layout>({
-        id: generateRandomString(5),
+        id: "root",
         type: LayoutType.PANEL,
         direction: Direction.HORIZONTAL, // horizontal,
         children: [
@@ -97,34 +97,80 @@ const Supervisor: Component = () => {
         return path;
     }
 
-    // TODO: to replace parent with its child if there is only one child
-    function ascendLayout(layoutId: string){
 
+
+    function replaceLayout(targetLayoutId: string, replacementLayout: Layout){
+        let path = getLayoutPath(layout, targetLayoutId);
+        let replacePath: any = [];
+
+        if(path.length > 1) {
+            let replaceFunc = (layouts: any[]) => layouts.map((subLayout: any) => {
+                let newLayout = subLayout;
+                if(subLayout.id === targetLayoutId){
+                    newLayout = replacementLayout;
+                }
+                return newLayout
+            });
+            path.forEach((elem: any, i: number) => {
+                if(i === 0) {
+                    replacePath = [...replacePath, "children"];
+                }else if(i === path.length - 1){
+                    if(i === 1){
+                        replacePath = [...replacePath, replaceFunc];
+                    }else {
+                        replacePath = [...replacePath, "children", replaceFunc];
+                    }
+                }else{
+                    if(i === 1){
+                        replacePath = [...replacePath, (p: any) => p.id === elem.id];
+                    }else {
+                        replacePath = [...replacePath, "children", (p: any) => p.id === elem.id];
+                    }
+                }
+            });
+            console.log(path);
+            console.log(replacePath);
+            setLayout.apply(null, replacePath);
+        }else {
+            batch(() => {
+                setLayout("children", [replacementLayout]);
+                setLayout("direction", Direction.NO_SPLIT);
+            });
+        }
     }
 
-    function deleteLayout(layoutId: string): string {
+    function deleteLayout(layoutId: string) {
         let path = getLayoutPath(layout, layoutId);
-        let deletePath: any = [];
-        let layoutToAscend = null;
-        let layoutIdTemp = layoutId;
+        console.log(path);
+        //let deletePath: any = [];
+        //let layoutIdTemp = layoutId;
         let parentPanel = path[path.length - 2];
-        if(parentPanel.children) {
-            if(parentPanel.children.length === 1){
-                console.log("DELETE LAYOUT");
-                layoutIdTemp = parentPanel.id;
-                path.pop();
-                console.log(path);
-                parentPanel = path[path.length - 2];
-            }
+
+        if(parentPanel.children && parentPanel.children.length === 2){
+            let brotherLayout = parentPanel.children.filter(layout => layout.id !== layoutId)[0];
+            replaceLayout(parentPanel.id, brotherLayout);
+
         }
+        /*
+         else{
+            layoutIdTemp = parentPanel.id;
+            path.pop();
+            console.log(path);
+            parentPanel = path[path.length - 2];
+        }
+        */
+        /*
+        let deleteFunc = (layouts: any[]) => layouts.filter((layout: any) => layout.id !== layoutIdTemp);
+
+
         path.forEach((elem: any, i: number) => {
             if(i === 0) {
                 deletePath = [...deletePath, "children"];
             }else if(i === path.length - 1){
                 if(i === 1){
-                    deletePath = [...deletePath, (p: any[]) => p.filter((e: any) => e.id !== layoutIdTemp)];
+                    deletePath = [...deletePath, deleteFunc];
                 }else {
-                    deletePath = [...deletePath, "children", (p: any[]) => p.filter((e: any) => e.id !== layoutIdTemp)];
+                    deletePath = [...deletePath, "children", deleteFunc];
                 }
             }else{
                 if(i === 1){
@@ -134,9 +180,10 @@ const Supervisor: Component = () => {
                 }
             }
         });
-        console.log(parentPanel.type);
-        setLayout.apply(null, deletePath);
-        return parentPanel.id; 
+        */
+        //console.log(parentPanel.type);
+        //setLayout.apply(null, deletePath);
+        //return parentPanel.id; 
     }
 
     function setPanelDirection(panelId: string, direction: Direction) {
@@ -171,7 +218,7 @@ const Supervisor: Component = () => {
 
     function deleteEditor(editorId: string) {
         let parentId = deleteLayout(editorId);
-        setPanelDirection(parentId, Direction.NO_SPLIT);
+        //setPanelDirection(parentId, Direction.NO_SPLIT);
         deleteEditorState(editorId);
     }
 
