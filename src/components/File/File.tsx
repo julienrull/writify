@@ -1,82 +1,78 @@
-import styles from './File.module.css'
+import styles from './FileView.module.css'
 import crossWhite from '../../assets/close_white.png';
 import { Component, createSignal } from 'solid-js';
-
-export interface FileStruct {
-    title: string;
-    content: string;
-    active: boolean;
-}
+import { FileStruct, useEditor } from '../../application/EditorProvider';
+import { useLayer } from '../../application/LayerProvider';
 
 interface FileProps {
     fileStruct: FileStruct;
-    onFileMouseDown?: (file: FileStruct) => void;
-    onFileClose?: (file: FileStruct) => void;
-    onFileDragStart?: (event: DragEvent) => void;
-    onFileDrop?: (event: DragEvent, targetFileName: string) => void;
-    draggable?: boolean;
+    editorId: string;
 }
-const File: Component<FileProps>= (props) => {
+export const File: Component<FileProps>= (props) => {
+    const [_isOver, setIsOver] = createSignal<boolean>(false);
 
-    const [hover, setHover] = createSignal(false);
+    const [, editorController] = useEditor();
+    const [, layerController] = useLayer();
 
-    function onMouseDown(e: MouseEvent) {
-        if(e.target === e.currentTarget || e.target instanceof HTMLSpanElement) {
-            props.onFileMouseDown ? props.onFileMouseDown({...props.fileStruct}) : undefined;
+    function onDragOver(e: DragEvent) {
+        setIsOver(true);
+        e.preventDefault();
+    }
+
+    function onDragleave(e: DragEvent) {
+        setIsOver(false);
+        e.preventDefault();
+    }
+
+    function onDragDrop(e: DragEvent) {
+        setIsOver(false);
+        if(e.dataTransfer) {
+            let data = JSON.parse(e.dataTransfer.getData("text/plain"));
+            let sourceFileName = data.sourceFileName;
+            let targetFileName = props.fileStruct.title;
+            let sourceEditorId = data.sourceEditorId;
+            let targetEditorId = editorController.getEditor(props.editorId).id;
+            console.log(targetEditorId);
+            editorController.transferFilePosition(sourceFileName, targetFileName, sourceEditorId, targetEditorId);
         }
+        e.preventDefault();
+    }
+
+    function onDragEnd(e: DragEvent) {
+        setIsOver(false);
+        e.preventDefault();
     }
 
     function onClose(e: MouseEvent) {
-        props.onFileClose ? props.onFileClose(props.fileStruct) : undefined;
+        editorController.closeFile(props.editorId, props.fileStruct.title);
+        if (editorController.getEditor(props.editorId).files.length === 0) {
+          layerController.deleteLayout(props.editorId)
+          editorController.deleteEditor(props.editorId);
+        }
         e.stopPropagation();
     }
 
     function onDragStart(e: DragEvent) {
         if(e.dataTransfer) {
             e.dataTransfer.effectAllowed = "move"
+            let editor = editorController.getEditor(props.editorId);
             let data = {
-                sourceFileName : props.fileStruct.title
+                sourceFileName : props.fileStruct.title,
+                sourceEditorId: editor.id
             }
             e.dataTransfer.setData("text/plain", JSON.stringify(data));
         }
-        props.onFileDragStart ? props.onFileDragStart(e) : undefined;
     }
-
-    function onDragHover(e: DragEvent) {
-        console.log("Hover !");
-        setHover(true);
-        e.preventDefault();
-    }
-
-    function onDragleave(e: DragEvent) {
-        setHover(false);
-        e.preventDefault();
-    }
-
-    function onDragDrop(e: DragEvent) {
-        setHover(false);
-        if(e.dataTransfer) {
-            props.onFileDrop ? props.onFileDrop(e, props.fileStruct.title) : undefined;
+    function onMouseDown(e: MouseEvent) {
+        if(e.target === e.currentTarget || e.target instanceof HTMLSpanElement) {
+            editorController.switchFile(props.editorId, props.fileStruct);
         }
-        e.preventDefault();
     }
-
-    function onDragEnd(e: DragEvent) {
-        setHover(false);
-        e.preventDefault();
-    }
-
     return (
-        <div onDragEnd={onDragEnd} onDragOver={onDragHover} draggable={props.draggable} ondragstart={onDragStart} onMouseDown={onMouseDown} classList={{[styles.File]: true, [styles.FileSelected]: props.fileStruct.active}}>
-            <div onDrop={onDragDrop} ondragleave={onDragleave} classList={{[styles.FileHover]: true, [styles.FileHoverActive]: hover()}}></div>
+        <div onDragEnd={onDragEnd} onDragOver={onDragOver} draggable={true} ondragstart={onDragStart} onMouseDown={onMouseDown} classList={{[styles.File]: true, [styles.FileSelected]: props.fileStruct.active}}>
+            <div onDrop={onDragDrop} ondragleave={onDragleave} classList={{[styles.FileHover]: true, [styles.FileHoverActive]: _isOver()}}></div>
             <span class={styles.FileTitle}>{props.fileStruct.title}</span>
             <img onClick={onClose} class={styles.FileCloseIcon} src={crossWhite} alt="" />
         </div>
     );
-}
-
-export  {File};
-
-function useEffect() {
-    throw new Error('Function not implemented.');
 }

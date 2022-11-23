@@ -1,12 +1,17 @@
 import styles from './App.module.css';
-import {Panel, Direction} from './components/Panel/Panel';
-import { Component, createSignal } from "solid-js";
+import { Component } from "solid-js";
 import Supervisor from './components/Supervisor/Supervisor';
+import { EditorProvider } from './application/EditorProvider';
+import { LayerProvider } from './application/LayerProvider';
 
 const App: Component = () => {
   return (
     <div class={styles.App}>
-      <Supervisor/>
+      <EditorProvider>
+        <LayerProvider>
+          <Supervisor/>
+        </LayerProvider>
+      </EditorProvider>
     </div>
   );
 };
