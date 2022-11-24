@@ -8,34 +8,33 @@ import {
 import { createStore, produce } from "solid-js/store";
 import { Direction } from "../components/Panel/Panel";
 import { generateRandomString } from "../helpers/ToolsRandom";
+import { createEffect } from 'solid-js';
 
-enum LayoutType {
+export enum LayoutType {
   EDITOR,
   PANEL,
 }
 
-interface Layout {
+export interface Layout {
   id: string;
   type: LayoutType;
+  position?: string;
   direction?: Direction;
   children?: Layout[];
 }
 
 interface LayerProviderProps {
+  store: Layout;
+  services: any;
   children: any;
 }
 
 const LayerContext = createContext<any[]>();
 
 export const LayerProvider: Component<LayerProviderProps> = (props) => {
-  const [layouts, setLayout] = createStore<Layout>({
-    id: "root",
-    type: LayoutType.PANEL,
-    direction: Direction.HORIZONTAL, // horizontal,
-    children: [
-      { id: "test1", type: LayoutType.EDITOR },
-      { id: "test2", type: LayoutType.EDITOR },
-    ],
+  const [layouts, setLayout] = createStore<Layout>(props.store);
+  createEffect(() => {
+    props.services.layoutService.setLayout(layouts);
   });
   const layer = [
     layouts,
@@ -102,7 +101,6 @@ export const LayerProvider: Component<LayerProviderProps> = (props) => {
       },
       deleteLayout(layoutId: string) {
         let path = this.getLayoutPath(layouts, layoutId);
-        console.log(path);
         let parentPanel = path[path.length - 2];
         if (parentPanel.children && parentPanel.children.length === 2) {
           let brotherLayout = parentPanel.children.filter(
@@ -111,11 +109,50 @@ export const LayerProvider: Component<LayerProviderProps> = (props) => {
           this.replaceLayout(parentPanel.id, brotherLayout);
         }
       },
+      setLayout(panelId: string, prop: string, value: any) {
+        let path = this.getLayoutPath(layouts, panelId);
+        let setterPath: any = [];
+        path.forEach((elem: any, i: number) => {
+          if (i === 0) {
+            if (i === path.length - 1) {
+              setterPath = [...setterPath, prop, value];
+            } else {
+              setterPath = [...setterPath, "children"];
+            }
+          } else if (i === path.length - 1) {
+            if (i === 1) {
+              setterPath = [
+                ...setterPath,
+                (p: any) => p.id === elem.id,
+                prop,
+                value,
+              ];
+            } else {
+              setterPath = [
+                ...setterPath,
+                "children",
+                (p: any) => p.id === elem.id,
+                prop,
+                value,
+              ];
+            }
+          } else if (i !== path.length - 1) {
+            if (i === 1) {
+              setterPath = [...setterPath, (p: any) => p.id === elem.id];
+            } else {
+              setterPath = [
+                ...setterPath,
+                "children",
+                (p: any) => p.id === elem.id,
+              ];
+            }
+          }
+        });
+        setLayout.apply(null, setterPath);
+      },
       setPanelDirection(panelId: string, direction: Direction) {
         let path = this.getLayoutPath(layouts, panelId);
         let setterPath: any = [];
-        console.log("panelId ID : " + panelId);
-        console.log("PANEL PATH : " + path);
         path.forEach((elem: any, i: number) => {
           if (i === 0) {
             if (i === path.length - 1) {
@@ -180,7 +217,6 @@ export const LayerProvider: Component<LayerProviderProps> = (props) => {
             produceFunction = produce((editors: any) => {
               editors.unshift({ id: newEditorId, type: LayoutType.EDITOR });
             });
-            console.log("1 children LEFT OR TOP");
           }
           this.setPanelDirection(targetEditorPanel.id, direction);
         } else {

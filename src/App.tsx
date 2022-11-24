@@ -1,17 +1,15 @@
 import styles from './App.module.css';
 import { Component } from "solid-js";
 import Supervisor from './components/Supervisor/Supervisor';
-import { EditorProvider } from './application/EditorProvider';
-import { LayerProvider } from './application/LayerProvider';
+import { Providers } from './application/Providers';
+import services from './infrastructure/services';
 
 const App: Component = () => {
   return (
     <div class={styles.App}>
-      <EditorProvider>
-        <LayerProvider>
-          <Supervisor/>
-        </LayerProvider>
-      </EditorProvider>
+      <Providers services={services}>
+        <Supervisor/>
+      </Providers>
     </div>
   );
 };

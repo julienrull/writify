@@ -312,7 +312,9 @@ const Editor: Component<EditorProps> = (props) => {
         onPaste={onPaste}
         class={styles.Editor}
         contentEditable={true}
-      ></div>
+      >
+        
+      </div>
     </div>
   );
 };

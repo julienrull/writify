@@ -1,8 +1,8 @@
 import styles from "./Supervisor.module.css";
-import { batch, Component, JSX } from "solid-js";
+import { Component, JSX } from "solid-js";
 import { Editor } from "../Editor/Editor";
 import { Direction, Panel } from "../Panel/Panel";
-import { FileStruct, useEditor } from "../../application/EditorProvider";
+import { useEditor } from "../../application/EditorProvider";
 import { useLayer } from "../../application/LayerProvider";
 
 enum LayoutType {
@@ -34,7 +34,7 @@ const Supervisor: Component = () => {
         elements = [...elements, ...renderLayout(l)];
       });
       return [
-        <Panel direction={layout.direction}>
+        <Panel layout={layout}>
           {elements.map((elem) => elem)}
         </Panel>,
       ];

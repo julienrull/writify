@@ -1,6 +1,7 @@
 import styles from './Panel.module.css';
-import { onMount, Component, Show } from "solid-js";
+import { onMount, Component, Show, createEffect } from "solid-js";
 import throttled from '../../helpers/Throttled';
+import { Layout, useLayer } from '../../application/LayerProvider';
 
 
 enum Direction {
@@ -10,13 +11,17 @@ enum Direction {
 }
 
 export interface PanelProps{
-    direction: Direction;
+    layout: Layout
     children?: any;
 }
 
-const SIDEBAR_WIDTH = 'SidebarWidth';
-
 const Panel: Component<PanelProps> = (props) => {
+
+    const [layerState, layerController] = useLayer();
+
+    createEffect(() =>{
+        sessionStorage.setItem(props.layout.id, props.layout.position || "");
+    });
 
     let container: HTMLDivElement = document.createElement("div");
     let resizer: HTMLDivElement  = document.createElement("div"); 
@@ -38,10 +43,10 @@ const Panel: Component<PanelProps> = (props) => {
             e.preventDefault();
             let position = 0;
             let containerRect = container.getBoundingClientRect();
-            if (props.direction === Direction.HORIZONTAL) {
+            if (props.layout.direction === Direction.HORIZONTAL) {
                 position = e.pageX - containerRect.x;
             }
-            else if(props.direction === Direction.VERTICAL){
+            else if(props.layout.direction === Direction.VERTICAL){
                 position = e.pageY - containerRect.y;
             }
             cb(position);
@@ -49,25 +54,25 @@ const Panel: Component<PanelProps> = (props) => {
     }
 
     onMount(() => {
-        const oldSidebarWidth = sessionStorage.getItem(SIDEBAR_WIDTH);
+        const oldSidebarWidth = sessionStorage.getItem(props.layout.id);
         if(oldSidebarWidth != null) {
-            //container.style.setProperty('--sidebar', oldSidebarWidth);
+            container.style.setProperty('--sidebar', oldSidebarWidth);
         }
-        resize(resizer, throttled( function(x) {
+        resize(resizer, throttled(function(x) {
             const SidebarWidth = x + 'px';
-            //sessionStorage.setItem(SIDEBAR_WIDTH, SidebarWidth);
+            layerController.setLayout(props.layout.id, "position", SidebarWidth);
             container.style.setProperty('--sidebar', SidebarWidth);
         }));
     });
     return (
-        <div ref={container} classList={{[styles.PanelContainer]: true, [styles.Horizontal]: props.direction === Direction.HORIZONTAL, [styles.Vertical]: props.direction === Direction.VERTICAL, [styles.NoSplit]: props.direction === Direction.NO_SPLIT}}>
-            <div classList={{[styles.First]: true, [styles.BorderRight]: props.direction === Direction.HORIZONTAL, [styles.BorderBottom]: props.direction === Direction.VERTICAL,}}>
+        <div ref={container} classList={{[styles.PanelContainer]: true, [styles.Horizontal]: props.layout.direction === Direction.HORIZONTAL, [styles.Vertical]: props.layout.direction === Direction.VERTICAL, [styles.NoSplit]: props.layout.direction === Direction.NO_SPLIT}}>
+            <div classList={{[styles.First]: true, [styles.BorderRight]: props.layout.direction === Direction.HORIZONTAL, [styles.BorderBottom]: props.layout.direction === Direction.VERTICAL,}}>
                 {props.children.length > 1 ? props.children[0]: props.children}
-                <Show when={props.direction !== Direction.NO_SPLIT} fallback={<div>Loading...</div>}>
-                    <div ref={resizer} classList={{[styles.Resizer]: true, [styles.ResizerHorizontal]: props.direction=== Direction.HORIZONTAL, [styles.ResizerVertical]: props.direction === Direction.VERTICAL}}></div>
+                <Show when={props.layout.direction !== Direction.NO_SPLIT} fallback={<div>Loading...</div>}>
+                    <div ref={resizer} classList={{[styles.Resizer]: true, [styles.ResizerHorizontal]: props.layout.direction=== Direction.HORIZONTAL, [styles.ResizerVertical]: props.layout.direction === Direction.VERTICAL}}></div>
                 </Show>
             </div>
-            <div classList={{[styles.Second]: true, [styles.NoSplit]: props.direction === Direction.NO_SPLIT}}>
+            <div classList={{[styles.Second]: true, [styles.NoSplit]: props.layout.direction === Direction.NO_SPLIT}}>
                 {props.children[1]}
             </div>
         </div>

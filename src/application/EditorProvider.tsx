@@ -1,4 +1,4 @@
-import { Component, createContext, batch, useContext } from "solid-js";
+import { Component, createContext, batch, useContext, createEffect } from 'solid-js';
 import { createStore, produce } from "solid-js/store";
 import { changeElementPosition } from "../helpers/ToolsArray";
 import { generateRandomString } from "../helpers/ToolsRandom";
@@ -15,55 +15,18 @@ export interface EditorStruct {
 }
 
 interface EditorProviderProps {
+  store: EditorStruct[];
+  services: any;
   children: any;
 }
 
 const editorContext = createContext<any[]>();
 
 export const EditorProvider: Component<EditorProviderProps> = (props) => {
-  const [editors, setEditors] = createStore<EditorStruct[]>([
-    {
-      id: "test1",
-      files: [
-        {
-          title: "File 1",
-          content: "This is File 1",
-          active: true,
-        },
-        {
-          title: "File 2",
-          content: "This is File 2",
-          active: false,
-        },
-        {
-          title: "File 3",
-          content: "This is File 3",
-          active: false,
-        },
-      ],
-    },
-    {
-      id: "test2",
-      files: [
-        {
-          title: "File 4",
-          content: "This is File 4",
-          active: true,
-        },
-        {
-          title: "File 5",
-          content: "This is File 5",
-          active: false,
-        },
-        {
-          title: "File 6",
-          content: "This is File 6",
-          active: false,
-        },
-      ],
-    },
-  ]);
-
+  const [editors, setEditors] = createStore<EditorStruct[]>(props.store);
+  createEffect(() => {
+    props.services.editorService.setEditors(editors);
+  }); 
   const editor = [
     editors,
     {
