@@ -1,4 +1,5 @@
-import { EditorStruct } from "../../../components/Editor/Editor";
+import { EditorStruct } from "../../../application/EditorProvider";
+
 
 export default class EditorService {
   private endpoint = "editors";

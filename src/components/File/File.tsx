@@ -6,6 +6,7 @@ import { useLayer } from '../../application/LayerProvider';
 
 interface FileProps {
     fileStruct: FileStruct;
+    actualContent: string;
     editorId: string;
 }
 export const File: Component<FileProps>= (props) => {
@@ -33,7 +34,7 @@ export const File: Component<FileProps>= (props) => {
             let sourceEditorId = data.sourceEditorId;
             let targetEditorId = editorController.getEditor(props.editorId).id;
             console.log(targetEditorId);
-            editorController.transferFilePosition(sourceFileName, targetFileName, sourceEditorId, targetEditorId);
+            editorController.transferFilePosition(sourceFileName, targetFileName, sourceEditorId, targetEditorId, props.actualContent);
         }
         e.preventDefault();
     }
@@ -53,6 +54,9 @@ export const File: Component<FileProps>= (props) => {
     }
 
     function onDragStart(e: DragEvent) {
+        let newSourceFile = {...props.fileStruct};
+        newSourceFile.content = props.actualContent;
+        editorController.setFile(props.editorId, newSourceFile);
         if(e.dataTransfer) {
             e.dataTransfer.effectAllowed = "move"
             let editor = editorController.getEditor(props.editorId);
@@ -65,7 +69,7 @@ export const File: Component<FileProps>= (props) => {
     }
     function onMouseDown(e: MouseEvent) {
         if(e.target === e.currentTarget || e.target instanceof HTMLSpanElement) {
-            editorController.switchFile(props.editorId, props.fileStruct);
+            editorController.switchFile(props.editorId, props.fileStruct, props.actualContent);
         }
     }
     return (

@@ -1,4 +1,10 @@
-import { Component, createContext, batch, useContext, createEffect } from 'solid-js';
+import {
+  Component,
+  createContext,
+  batch,
+  useContext,
+  createEffect,
+} from "solid-js";
 import { createStore, produce } from "solid-js/store";
 import { changeElementPosition } from "../helpers/ToolsArray";
 import { generateRandomString } from "../helpers/ToolsRandom";
@@ -26,7 +32,7 @@ export const EditorProvider: Component<EditorProviderProps> = (props) => {
   const [editors, setEditors] = createStore<EditorStruct[]>(props.store);
   createEffect(() => {
     props.services.editorService.setEditors(editors);
-  }); 
+  });
   const editor = [
     editors,
     {
@@ -128,11 +134,12 @@ export const EditorProvider: Component<EditorProviderProps> = (props) => {
           (fs: FileStruct) => fs.active
         )[0];
       },
-      switchFile(editorId: string ,file: FileStruct) {
+      switchFile(editorId: string, file: FileStruct, actualContent: string) {
         let activeFile = { ...this.getActiveFile(editorId) };
-        let newActiveFile = { ...file }
+        let newActiveFile = { ...file };
         if (activeFile.title !== file.title) {
           activeFile.active = false;
+          activeFile.content = actualContent;
           newActiveFile.active = true;
           this.setFiles(editorId, [activeFile, newActiveFile]);
         }
@@ -176,31 +183,29 @@ export const EditorProvider: Component<EditorProviderProps> = (props) => {
             const targetFile = this.getFile(targetEditorId, targetFileName);
             const targetIndex = targetEditor.files.indexOf(targetFile);
             this.closeFile(sourceEditorId, sourceFile.title);
-            batch(() => {
-              setEditors(
-                (editor) => editor.id === targetEditorId,
-                "files",
-                (file) => file.active,
-                "active",
-                false
-              );
-              setEditors(
-                (editor) => editor.id === targetEditorId,
-                "files",
-                produce((files) => {
-                  files.push({ ...sourceFile });
-                })
-              );
-              setEditors(
-                (editor) => editor.id === targetEditorId,
-                "files",
-                changeElementPosition(
-                  targetEditor.files,
-                  targetEditor.files.length - 1,
-                  targetIndex
-                )
-              );
-            });
+            setEditors(
+              (editor) => editor.id === targetEditorId,
+              "files",
+              (file) => file.active,
+              "active",
+              false
+            );
+            setEditors(
+              (editor) => editor.id === targetEditorId,
+              "files",
+              produce((files) => {
+                files.push({ ...sourceFile });
+              })
+            );
+            setEditors(
+              (editor) => editor.id === targetEditorId,
+              "files",
+              changeElementPosition(
+                targetEditor.files,
+                targetEditor.files.length - 1,
+                targetIndex
+              )
+            );
           }
         });
         if (this.getEditor(sourceEditorId).files.length === 0) {

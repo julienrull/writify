@@ -8,13 +8,8 @@ import {
   createEffect,
 } from "solid-js";
 import { File } from "../File/File";
-import { FileStruct, useEditor } from "../../application/EditorProvider";
+import { EditorStruct, FileStruct, useEditor } from "../../application/EditorProvider";
 import { useLayer } from "../../application/LayerProvider";
-
-export interface EditorStruct {
-  id: string;
-  files: FileStruct[];
-}
 
 interface OverLayout {
   OverlapContainer: boolean;
@@ -39,6 +34,8 @@ const Editor: Component<EditorProps> = (props) => {
 
   const [filesHover, setFilesHover] = createSignal(false);
 
+  const [content, setContent] = createSignal<string>("");
+
   let [overLayout, setOverLayout] = createSignal<OverLayout>({
     OverlapContainer: false,
     Left: false,
@@ -49,12 +46,14 @@ const Editor: Component<EditorProps> = (props) => {
   });
 
   onMount(() => {
-    let activeFile = editorController.getActiveFile(props.editorStructure.id);
-    activeFileContent.innerHTML = activeFile ? activeFile.content : "";
+    //let activeFile = editorController.getActiveFile(props.editorStructure.id);
+    //setContent(activeFile ? activeFile.content : "");
+    //activeFileContent.innerHTML = activeFile ? activeFile.content : "";
   });
 
   createEffect(() => {
     let activeFile = editorController.getActiveFile(props.editorStructure.id);
+    setContent(activeFile ? activeFile.content : "");
     activeFileContent.innerHTML = activeFile ? activeFile.content : "";
   });
 
@@ -75,10 +74,6 @@ const Editor: Component<EditorProps> = (props) => {
     filesContainer != null
       ? (filesContainer.scrollLeft += e.deltaY)
       : filesContainer;
-  }
-
-  function getEditor(): EditorStruct {
-    return props.editorStructure;
   }
 
   function onFileOver(e: DragEvent) {
@@ -162,16 +157,21 @@ const Editor: Component<EditorProps> = (props) => {
     console.log(position);
     if (position !== "Full") {
       finalTargetEditorId = editorController.createEditor();
-      layerController.addEditorLayout(targetEditorId, finalTargetEditorId, position);
+      layerController.addEditorLayout(
+        targetEditorId,
+        finalTargetEditorId,
+        position
+      );
     }
     editorController.transferFile(
       fileName,
       sourceEditorId,
-      finalTargetEditorId
-    ); 
+      finalTargetEditorId,
+      activeFileContent.innerHTML
+    );
     if (editorController.getEditor(sourceEditorId).files.length === 0) {
       layerController.deleteLayout(sourceEditorId);
-      editorController.deleteEditorState(sourceEditorId);
+      editorController.deleteEditor(sourceEditorId);
     }
   }
 
@@ -256,15 +256,33 @@ const Editor: Component<EditorProps> = (props) => {
       let sourceEditorId = data.sourceEditorId;
       let targetEditorId = props.editorStructure.id;
       if (sourceEditorId !== props.editorStructure.id) {
-        transferFile(
-          sourceFileName,
-          sourceEditorId,
-          targetEditorId,
-          "Full"
-        );
+        transferFile(sourceFileName, sourceEditorId, targetEditorId, "Full");
       }
     }
     e.preventDefault();
+  }
+  /*
+  function placeCaretAtEnd(el: HTMLDivElement) {
+    el.focus();
+    if (typeof window.getSelection != "undefined"
+            && typeof document.createRange != "undefined") {
+        var range = document.createRange();
+        range.selectNodeContents(el);
+        range.collapse(false);
+        var sel = window.getSelection();
+        sel?.removeAllRanges();
+        sel?.addRange(range);
+    } else if (typeof document.body.createTextRange != "undefined") {
+        var textRange = document.body.createTextRange();
+        textRange.moveToElementText(el);
+        textRange.collapse(false);
+        textRange.select();
+    }
+}
+  */
+
+  function onContentChange(e: InputEvent) {
+    setContent(activeFileContent.innerHTML);
   }
 
   return (
@@ -276,10 +294,7 @@ const Editor: Component<EditorProps> = (props) => {
       >
         <For each={props.editorStructure?.files}>
           {(item: FileStruct, index: Accessor<number>) => (
-            <File
-              fileStruct={item}
-              editorId={props.editorStructure.id}
-            />
+            <File fileStruct={item} actualContent={content()} editorId={props.editorStructure.id} />
           )}
         </For>
         <div
@@ -312,8 +327,8 @@ const Editor: Component<EditorProps> = (props) => {
         onPaste={onPaste}
         class={styles.Editor}
         contentEditable={true}
+        onInput={onContentChange}
       >
-        
       </div>
     </div>
   );
