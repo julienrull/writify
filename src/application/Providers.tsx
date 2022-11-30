@@ -16,13 +16,13 @@ export const Providers: Component<ProvidersProps> = (props) => {
 
   if (!treeStore) {
     treeStore = {
-      name: "root",
+      name: "Workspace Folder",
       isOpen: true,
       type: Tree.FOLDER,
       selected: false,
       children: [
         {
-          name: "Version 1",
+          name: "Folder 1",
           isOpen: true,
           type: Tree.FOLDER,
           selected: false,
@@ -58,19 +58,10 @@ export const Providers: Component<ProvidersProps> = (props) => {
         id: "test1",
         files: [
           {
-            title: "File 1",
-            content: "This is File 1",
+            title: "Test",
+            content: "This is a test file",
             active: true,
-          },
-          {
-            title: "File 2",
-            content: "This is File 2",
-            active: false,
-          },
-          {
-            title: "File 3",
-            content: "This is File 3",
-            active: false,
+            saved: true
           },
         ],
       },

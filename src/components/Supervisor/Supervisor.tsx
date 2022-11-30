@@ -20,8 +20,10 @@ interface Layout {
 const Supervisor: Component = () => {
 
   // * CONTEXTS INIT => Editor and Layer states
-  const [editorState, editorController] = useEditor();
-  const [layoutState, layerController] = useLayer();
+  const [, editorController] = useEditor();
+  const [layoutState,] = useLayer();
+
+
 
   function renderLayout(layout: Layout): JSX.Element[] {
     let elements: JSX.Element[] = [];

@@ -12,6 +12,7 @@ export default class TreeService {
     return res;
   }
   public setTree(tree: TreeElement): void {
+    console.log("tree Storage save")
     window.localStorage.setItem(this.endpoint, JSON.stringify(tree));
   }
 }

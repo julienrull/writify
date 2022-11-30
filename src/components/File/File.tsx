@@ -6,7 +6,6 @@ import { useLayer } from '../../application/LayerProvider';
 
 interface FileProps {
     fileStruct: FileStruct;
-    actualContent: string;
     editorId: string;
 }
 export const File: Component<FileProps>= (props) => {
@@ -34,7 +33,7 @@ export const File: Component<FileProps>= (props) => {
             let sourceEditorId = data.sourceEditorId;
             let targetEditorId = editorController.getEditor(props.editorId).id;
             console.log(targetEditorId);
-            editorController.transferFilePosition(sourceFileName, targetFileName, sourceEditorId, targetEditorId, props.actualContent);
+            editorController.transferFilePosition(sourceFileName, targetFileName, sourceEditorId, targetEditorId);
         }
         e.preventDefault();
     }
@@ -55,7 +54,6 @@ export const File: Component<FileProps>= (props) => {
 
     function onDragStart(e: DragEvent) {
         let newSourceFile = {...props.fileStruct};
-        newSourceFile.content = props.actualContent;
         editorController.setFile(props.editorId, newSourceFile);
         if(e.dataTransfer) {
             e.dataTransfer.effectAllowed = "move"
@@ -69,11 +67,12 @@ export const File: Component<FileProps>= (props) => {
     }
     function onMouseDown(e: MouseEvent) {
         if(e.target === e.currentTarget || e.target instanceof HTMLSpanElement) {
-            editorController.switchFile(props.editorId, props.fileStruct, props.actualContent);
+            editorController.switchFile(props.editorId, props.fileStruct);
         }
     }
     return (
         <div onDragEnd={onDragEnd} onDragOver={onDragOver} draggable={true} ondragstart={onDragStart} onMouseDown={onMouseDown} classList={{[styles.File]: true, [styles.FileSelected]: props.fileStruct.active}}>
+            <div classList={{[styles.FileChangedIndicator]: !props.fileStruct.saved}}></div>
             <div onDrop={onDragDrop} ondragleave={onDragleave} classList={{[styles.FileHover]: true, [styles.FileHoverActive]: _isOver()}}></div>
             <span class={styles.FileTitle}>{props.fileStruct.title}</span>
             <img onClick={onClose} class={styles.FileCloseIcon} src={crossWhite} alt="" />

@@ -1,30 +1,33 @@
 import styles from "./Sidenav.module.css";
 import { batch, Component, For, JSX, Show } from "solid-js";
-import { Tree, TreeElement, useTree } from '../../application/TreeProvider';
-
+import { Tree, TreeController, TreeElement, useTree } from '../../application/TreeProvider';
+import { useEditor } from '../../application/EditorProvider';
 
 interface TreeProps {
   element: TreeElement;
 }
 
-
 let selected = "";
 
-
 export const File: Component<TreeProps> = (props) => {
-  const [tree, treeController] = useTree();
-    function onClick() {
-        batch(() => {
-            if(selected !== ""){
-                treeController.setTreeElement(selected, "selected", false);
-            }
-            selected = props.element.name.slice();
-            treeController.setTreeElement(selected, "selected", true);
-        });
-    }
+  const [, treeController] = useTree();
+  const [, editorController] = useEditor();
+  if(props.element.selected) {
+    selected = props.element.name;
+  }
+  function onClick() {
+    batch(() => {
+      if (selected !== "") {
+        treeController.setTreeElement(selected, "selected", false);
+      }
+      selected = props.element.name.slice();
+      treeController.setTreeElement(selected, "selected", true);
+    });
+    editorController.inject(props.element);
+  }
   return (
     <li
-    onClick={onClick}
+      onClick={onClick}
       classList={{
         [styles.TitleDisable]: !props.element.selected,
         [styles.TitleEnable]: props.element.selected,
@@ -36,15 +39,22 @@ export const File: Component<TreeProps> = (props) => {
 };
 
 export const Folder: Component<TreeProps> = (props) => {
-  const [tree, treeController] = useTree();
+  const [, treeController] = useTree();
+  if(props.element.selected) {
+    selected = props.element.name;
+  }
   function onClick() {
     batch(() => {
-        if(selected !== ""){
-            treeController.setTreeElement(selected, "selected", false);
-        }
-        selected = props.element.name;
-        treeController.setTreeElement(props.element.name, "selected", true);
-        treeController.setTreeElement(props.element.name, "isOpen", !props.element.isOpen);
+      if (selected !== "") {
+        treeController.setTreeElement(selected, "selected", false);
+      }
+      selected = props.element.name;
+      treeController.setTreeElement(props.element.name, "selected", true);
+      treeController.setTreeElement(
+        props.element.name,
+        "isOpen",
+        !props.element.isOpen
+      );
     });
   }
   return (

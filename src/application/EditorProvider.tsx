@@ -8,11 +8,13 @@ import {
 import { createStore, produce } from "solid-js/store";
 import { changeElementPosition } from "../helpers/ToolsArray";
 import { generateRandomString } from "../helpers/ToolsRandom";
+import { TreeElement } from "./TreeProvider";
 
 export interface FileStruct {
   title: string;
   content: string;
   active: boolean;
+  saved: boolean;
 }
 
 export interface EditorStruct {
@@ -37,6 +39,26 @@ export const EditorProvider: Component<EditorProviderProps> = (props) => {
     editors,
     {
       //* EDITOR
+      inject(file: TreeElement): void{
+        let fileStruct: FileStruct = {
+          title: file.name,
+          content: file.textContent ? file.textContent : "",
+          active: false,
+          saved: true
+        };
+        let isFileOpen = false;
+        editors.forEach((editor: EditorStruct) => {
+          let fs  = this.getFile(editor.id, file.name);
+          if(fs){
+            isFileOpen = true;
+            this.switchFile(editor.id, fs);
+          }
+        });
+        if(!isFileOpen){
+          this.addFile(editors[0].id, fileStruct);
+          this.switchFile(editors[0].id, fileStruct);
+        }
+      },
       deleteEditor(editorId: string): void {
         setEditors(editors.filter((editor) => editor.id !== editorId));
       },
@@ -134,12 +156,11 @@ export const EditorProvider: Component<EditorProviderProps> = (props) => {
           (fs: FileStruct) => fs.active
         )[0];
       },
-      switchFile(editorId: string, file: FileStruct, actualContent: string) {
+      switchFile(editorId: string, file: FileStruct) {
         let activeFile = { ...this.getActiveFile(editorId) };
         let newActiveFile = { ...file };
         if (activeFile.title !== file.title) {
           activeFile.active = false;
-          activeFile.content = actualContent;
           newActiveFile.active = true;
           this.setFiles(editorId, [activeFile, newActiveFile]);
         }

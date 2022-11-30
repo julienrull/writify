@@ -8,8 +8,13 @@ import {
   createEffect,
 } from "solid-js";
 import { File } from "../File/File";
-import { EditorStruct, FileStruct, useEditor } from "../../application/EditorProvider";
+import {
+  EditorStruct,
+  FileStruct,
+  useEditor,
+} from "../../application/EditorProvider";
 import { useLayer } from "../../application/LayerProvider";
+import { useTree } from "../../application/TreeProvider";
 
 interface OverLayout {
   OverlapContainer: boolean;
@@ -31,10 +36,9 @@ const Editor: Component<EditorProps> = (props) => {
 
   const [, editorController] = useEditor();
   const [, layerController] = useLayer();
+  const [, treeController] = useTree();
 
   const [filesHover, setFilesHover] = createSignal(false);
-
-  const [content, setContent] = createSignal<string>("");
 
   let [overLayout, setOverLayout] = createSignal<OverLayout>({
     OverlapContainer: false,
@@ -45,28 +49,46 @@ const Editor: Component<EditorProps> = (props) => {
     Full: false,
   });
 
-  onMount(() => {
-    //let activeFile = editorController.getActiveFile(props.editorStructure.id);
-    //setContent(activeFile ? activeFile.content : "");
-    //activeFileContent.innerHTML = activeFile ? activeFile.content : "";
+  document.addEventListener("keydown", (e) => {
+    if (e.ctrlKey && e.key === "s") {
+      e.preventDefault();
+      let activeFile = {
+        ...editorController.getActiveFile(props.editorStructure.id),
+      };
+      if (!activeFile.saved) {
+        activeFile.saved = true;
+        editorController.setFile(props.editorStructure.id, activeFile);
+      }
+      treeController.save(activeFile);
+      console.log("CTRL + S");
+    }
   });
 
-  createEffect(() => {
+  onMount(() => {
     let activeFile = editorController.getActiveFile(props.editorStructure.id);
-    setContent(activeFile ? activeFile.content : "");
     activeFileContent.innerHTML = activeFile ? activeFile.content : "";
   });
 
-  const toggleStyle = function (e: MouseEvent) {
-    e.preventDefault();
-    let element: HTMLElement = e.currentTarget as HTMLElement;
-    document.execCommand(element.id);
-  };
+  createEffect((prev: FileStruct) => {
+    let activeFile = editorController.getActiveFile(props.editorStructure.id);
+    if(prev && activeFile && prev.title !== activeFile.title){
+      activeFileContent.innerHTML = activeFile ? activeFile.content : "";
+    }
+    return activeFile;
+  });
 
   function onPaste(e: ClipboardEvent) {
     e.preventDefault();
     var text = e.clipboardData?.getData("text/plain");
     document.execCommand("insertText", false, text);
+
+    let activeFile = {
+      ...editorController.getActiveFile(props.editorStructure.id),
+    };
+    if (activeFile.saved) {
+      activeFile.saved = false;
+      editorController.setFile(props.editorStructure.id, activeFile);
+    }
   }
 
   function onWheel(e: WheelEvent) {
@@ -261,28 +283,16 @@ const Editor: Component<EditorProps> = (props) => {
     }
     e.preventDefault();
   }
-  /*
-  function placeCaretAtEnd(el: HTMLDivElement) {
-    el.focus();
-    if (typeof window.getSelection != "undefined"
-            && typeof document.createRange != "undefined") {
-        var range = document.createRange();
-        range.selectNodeContents(el);
-        range.collapse(false);
-        var sel = window.getSelection();
-        sel?.removeAllRanges();
-        sel?.addRange(range);
-    } else if (typeof document.body.createTextRange != "undefined") {
-        var textRange = document.body.createTextRange();
-        textRange.moveToElementText(el);
-        textRange.collapse(false);
-        textRange.select();
-    }
-}
-  */
 
   function onContentChange(e: InputEvent) {
-    setContent(activeFileContent.innerHTML);
+    let activeFile = {
+      ...editorController.getActiveFile(props.editorStructure.id),
+    };
+    activeFile.content = activeFileContent.innerHTML;
+    if (activeFile.saved) {
+      activeFile.saved = false;
+    }
+    editorController.setFile(props.editorStructure.id, activeFile);
   }
 
   return (
@@ -294,7 +304,7 @@ const Editor: Component<EditorProps> = (props) => {
       >
         <For each={props.editorStructure?.files}>
           {(item: FileStruct, index: Accessor<number>) => (
-            <File fileStruct={item} actualContent={content()} editorId={props.editorStructure.id} />
+            <File fileStruct={item} editorId={props.editorStructure.id} />
           )}
         </For>
         <div
@@ -328,8 +338,7 @@ const Editor: Component<EditorProps> = (props) => {
         class={styles.Editor}
         contentEditable={true}
         onInput={onContentChange}
-      >
-      </div>
+      ></div>
     </div>
   );
 };
