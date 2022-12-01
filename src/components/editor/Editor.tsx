@@ -72,8 +72,11 @@ const Editor: Component<EditorProps> = (props) => {
   createEffect((prev: FileStruct) => {
     let activeFile = editorController.getActiveFile(props.editorStructure.id);
     if(prev && activeFile && prev.title !== activeFile.title){
-      activeFileContent.innerHTML = activeFile ? activeFile.content : "";
+      activeFileContent.innerHTML =  activeFile.content;
+    }else if(!prev && activeFile) {
+      activeFileContent.innerHTML =  activeFile.content;
     }
+    //console.log(activeFile);
     return activeFile;
   });
 

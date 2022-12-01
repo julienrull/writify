@@ -1,4 +1,4 @@
-import styles from './Panel.module.css';
+import styles from './SidebarPanel.module.css';
 import { onMount, Component, Show, createEffect, createSignal } from 'solid-js';
 import throttled from '../../helpers/Throttled';
 import { Layout, useLayer } from '../../application/LayerProvider';
@@ -15,7 +15,7 @@ export interface PanelProps{
     children?: any;
 }
 
-const Panel: Component<PanelProps> = (props) => {
+const SidebarPanel: Component<PanelProps> = (props) => {
 
     const [layerState, layerController] = useLayer();
     const [pos, setPos] = createSignal(0);
@@ -37,7 +37,6 @@ const Panel: Component<PanelProps> = (props) => {
 
         function onPointerUp(e: PointerEvent){
             document.removeEventListener('pointermove', onPointerMove);
-            layerController.setLayout(props.layout.id, "position", pos());
         }
 
         function onPointerMove(e: PointerEvent){
@@ -55,7 +54,6 @@ const Panel: Component<PanelProps> = (props) => {
     }
 
     onMount(() => {
-        console.log(props.layout);
         const oldSidebarWidth = sessionStorage.getItem(props.layout.id);
         if(oldSidebarWidth != null) {
             container.style.setProperty('--sidebar', oldSidebarWidth);
@@ -81,4 +79,4 @@ const Panel: Component<PanelProps> = (props) => {
     );
 }
 
-export {Panel, Direction};
+export {SidebarPanel, Direction};

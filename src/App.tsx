@@ -6,10 +6,11 @@ import services from './infrastructure/services';
 import { Sidenav } from './components/Sidenav/Sidenav';
 import { Direction, Panel } from './components/Panel/Panel';
 import { LayoutType } from './application/LayerProvider';
+import { SidebarPanel } from './components/SidebarPanel/SidebarPanel';
 
 
 const layout= {
-  id: "root",
+  id: "sidebarPanel",
   type: LayoutType.PANEL,
   position: "400px",
   direction: Direction.HORIZONTAL,
@@ -19,10 +20,10 @@ const App: Component = () => {
   return (
     <div class={styles.App}>
       <Providers services={services}>
-        <Panel layout={layout} >
+        <SidebarPanel layout={layout} >
           <Sidenav/>
           <Supervisor/>
-        </Panel>
+        </SidebarPanel>
       </Providers>
     </div>
   );

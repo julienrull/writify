@@ -3,7 +3,7 @@ import { Component, JSX } from "solid-js";
 import { Editor } from "../Editor/Editor";
 import { Direction, Panel } from "../Panel/Panel";
 import { useEditor } from "../../application/EditorProvider";
-import { useLayer } from "../../application/LayerProvider";
+import { useLayer } from '../../application/LayerProvider';
 
 enum LayoutType {
   EDITOR,
@@ -50,7 +50,8 @@ const Supervisor: Component = () => {
 
   return (
     <div id={styles.Container}>
-      {renderLayout(layoutState).map((elem) => elem)}
+      {/*renderLayout(layoutState).map((elem) => elem)*/}
+      <Panel layout={layoutState}></Panel>
     </div>
   );
 };
