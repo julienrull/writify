@@ -10,10 +10,12 @@
 }
 
 .Horizontal {
+  grid-auto-flow: column;
   grid-template-columns: var(--sidebarClamped) 1fr;
 }
 
 .Vertical {
+  grid-auto-flow: row;
   grid-template-rows: var(--sidebarClamped) 1fr;
 }
 

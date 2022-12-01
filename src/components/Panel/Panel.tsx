@@ -56,10 +56,7 @@ const Panel: Component<PanelProps> = (props) => {
 
     onMount(() => {
         console.log(props.layout);
-        const oldSidebarWidth = sessionStorage.getItem(props.layout.id);
-        if(oldSidebarWidth != null) {
-            container.style.setProperty('--sidebar', oldSidebarWidth);
-        }
+        container.style.setProperty('--sidebar', props.layout.position + 'px');
         resize(resizer, throttled(function(x) {
             setPos(x);
             const SidebarWidth = x + 'px';

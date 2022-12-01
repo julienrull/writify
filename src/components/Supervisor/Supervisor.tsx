@@ -50,8 +50,7 @@ const Supervisor: Component = () => {
 
   return (
     <div id={styles.Container}>
-      {/*renderLayout(layoutState).map((elem) => elem)*/}
-      <Panel layout={layoutState}></Panel>
+      {renderLayout(layoutState).map((elem) => elem)}
     </div>
   );
 };
