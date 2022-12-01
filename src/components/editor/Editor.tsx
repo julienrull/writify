@@ -52,15 +52,17 @@ const Editor: Component<EditorProps> = (props) => {
   document.addEventListener("keydown", (e) => {
     if (e.ctrlKey && e.key === "s") {
       e.preventDefault();
-      let activeFile = {
-        ...editorController.getActiveFile(props.editorStructure.id),
-      };
-      if (!activeFile.saved) {
-        activeFile.saved = true;
-        editorController.setFile(props.editorStructure.id, activeFile);
+      if(props.editorStructure.active){
+        let activeFile = {
+          ...editorController.getActiveFile(props.editorStructure.id),
+        };
+        if (!activeFile.saved) {
+          activeFile.saved = true;
+          editorController.setFile(props.editorStructure.id, activeFile);
+        }
+        treeController.save(activeFile);
+        console.log("CTRL + S");
       }
-      treeController.save(activeFile);
-      console.log("CTRL + S");
     }
   });
 
@@ -194,6 +196,7 @@ const Editor: Component<EditorProps> = (props) => {
       finalTargetEditorId,
       activeFileContent.innerHTML
     );
+    editorController.setActivatedEditor(finalTargetEditorId);
     if (editorController.getEditor(sourceEditorId).files.length === 0) {
       layerController.deleteLayout(sourceEditorId);
       editorController.deleteEditor(sourceEditorId);
@@ -298,6 +301,13 @@ const Editor: Component<EditorProps> = (props) => {
     editorController.setFile(props.editorStructure.id, activeFile);
   }
 
+  function onFocus(){
+    if(!props.editorStructure.active){
+      editorController.setActivatedEditor(props.editorStructure.id);
+      console.log("Editor " + props.editorStructure.id + " focused.");
+    }
+  }
+
   return (
     <div onDragEnd={onFileDragEnd} class={styles.Container}>
       <div
@@ -307,7 +317,7 @@ const Editor: Component<EditorProps> = (props) => {
       >
         <For each={props.editorStructure?.files}>
           {(item: FileStruct, index: Accessor<number>) => (
-            <File fileStruct={item} editorId={props.editorStructure.id} />
+            <File fileStruct={item} editorStruct={props.editorStructure} />
           )}
         </For>
         <div
@@ -341,6 +351,7 @@ const Editor: Component<EditorProps> = (props) => {
         class={styles.Editor}
         contentEditable={true}
         onInput={onContentChange}
+        onFocus={onFocus}
       ></div>
     </div>
   );

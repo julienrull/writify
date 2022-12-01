@@ -7,22 +7,11 @@ interface TreeProps {
   element: TreeElement;
 }
 
-let selected = "";
-
 export const File: Component<TreeProps> = (props) => {
   const [, treeController] = useTree();
   const [, editorController] = useEditor();
-  if(props.element.selected) {
-    selected = props.element.name;
-  }
   function onClick() {
-    batch(() => {
-      if (selected !== "") {
-        treeController.setTreeElement(selected, "selected", false);
-      }
-      selected = props.element.name.slice();
-      treeController.setTreeElement(selected, "selected", true);
-    });
+    treeController.setActivatedTreeElement(props.element.name);
     editorController.inject(props.element);
   }
   return (
@@ -40,16 +29,9 @@ export const File: Component<TreeProps> = (props) => {
 
 export const Folder: Component<TreeProps> = (props) => {
   const [, treeController] = useTree();
-  if(props.element.selected) {
-    selected = props.element.name;
-  }
   function onClick() {
     batch(() => {
-      if (selected !== "") {
-        treeController.setTreeElement(selected, "selected", false);
-      }
-      selected = props.element.name;
-      treeController.setTreeElement(props.element.name, "selected", true);
+      treeController.setActivatedTreeElement(props.element.name);
       treeController.setTreeElement(
         props.element.name,
         "isOpen",

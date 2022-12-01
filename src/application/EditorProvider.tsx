@@ -19,6 +19,7 @@ export interface FileStruct {
 
 export interface EditorStruct {
   id: string;
+  active: boolean;
   files: FileStruct[];
 }
 
@@ -39,7 +40,20 @@ export const EditorProvider: Component<EditorProviderProps> = (props) => {
     editors,
     {
       //* EDITOR
+      getActivatedEditor(): EditorStruct | undefined {
+        return editors.filter((editor: EditorStruct) => editor.active)[0];
+      },
+      setActivatedEditor(editorId: string): void{
+        batch(() => {
+          setEditors((editor: EditorStruct) => editor.active, "active", false);
+          setEditors((editor: EditorStruct) => editor.id === editorId, "active", true);
+        });
+      },
       inject(file: TreeElement): void{
+        let activatedEditor = this.getActivatedEditor();
+        if(!activatedEditor){
+          activatedEditor = editors[0];
+        }
         let fileStruct: FileStruct = {
           title: file.name,
           content: file.textContent ? file.textContent : "",
@@ -52,11 +66,12 @@ export const EditorProvider: Component<EditorProviderProps> = (props) => {
           if(fs){
             isFileOpen = true;
             this.switchFile(editor.id, fs);
+            this.setActivatedEditor(editor.id);
           }
         });
         if(!isFileOpen){
-          this.addFile(editors[0].id, fileStruct);
-          this.switchFile(editors[0].id, fileStruct);
+          this.addFile(activatedEditor.id, fileStruct);
+          this.switchFile(activatedEditor.id, fileStruct);
         }
       },
       deleteEditor(editorId: string): void {
@@ -68,6 +83,7 @@ export const EditorProvider: Component<EditorProviderProps> = (props) => {
           produce((editors) =>
             editors.push({
               id: newEditorId,
+              active: false,
               files: [],
             })
           )

@@ -40,7 +40,7 @@
     border-bottom: solid 1px coral;
 }
 
-.FileSelected > .FileCloseIcon{
+.FileSelected, .FileTitleActivated > .FileCloseIcon{
     opacity: 1 !important;
 }
 
@@ -65,4 +65,12 @@
 
 .FileTitle{
     padding-left: 15px;
+}
+
+.FileTitleActivated{
+    color: rgba(255, 255, 255, 1);
+}
+
+.FileTitleDesactivated{
+    color: rgba(255, 255, 255, 0.5);
 }
