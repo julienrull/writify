@@ -57,7 +57,7 @@ export const LayerProvider: Component<LayerProviderProps> = (props) => {
       replaceLayout(targetLayoutId: string, replacementLayout: Layout) {
         let path = this.getLayoutPath(layouts, targetLayoutId);
         let replacePath: any = [];
-
+        console.log(path);
         if (path.length > 1) {
           let replaceFunc = (layouts: any[]) =>
             layouts.map((subLayout: any) => {
@@ -88,8 +88,6 @@ export const LayerProvider: Component<LayerProviderProps> = (props) => {
               }
             }
           });
-          console.log(path);
-          console.log(replacePath);
           setLayout.apply(null, replacePath);
         } else {
           batch(() => {
@@ -101,11 +99,16 @@ export const LayerProvider: Component<LayerProviderProps> = (props) => {
       deleteLayout(layoutId: string) {
         let path = this.getLayoutPath(layouts, layoutId);
         let parentPanel = path[path.length - 2];
+        console.log(parentPanel);
         if (parentPanel.children && parentPanel.children.length === 2) {
+          console.log("JE PASSE !!!");
           let brotherLayout = parentPanel.children.filter(
             (layout) => layout.id !== layoutId
           )[0];
           this.replaceLayout(parentPanel.id, brotherLayout);
+        }else {
+          // Cas où il faut supprimer l'éditeur racine
+          setLayout("children", []);
         }
       },
       setLayout(panelId: string, prop: string, value: any) {
@@ -198,6 +201,7 @@ export const LayerProvider: Component<LayerProviderProps> = (props) => {
         let path = this.getLayoutPath(layouts, targetEditorId);
         let addPath: any = [];
         let targetEditorPanel = path[path.length - 2];
+        console.log(targetEditorPanel)
         let produceFunction = produce((editors: any) => {
           editors.push({ id: newEditorId, type: LayoutType.EDITOR });
         });
@@ -269,9 +273,15 @@ export const LayerProvider: Component<LayerProviderProps> = (props) => {
             }
           }  
         });
-        console.log(path);
-        console.log(targetEditorId);
         setLayout.apply(null, addPath);
+      },
+      createRootEditor(
+        newEditorId: string,
+        position: string
+      ) {
+        setLayout("children", [
+          { id: newEditorId, type: LayoutType.EDITOR }
+        ]);
       },
     },
   ];

@@ -6,6 +6,7 @@ import {
   For,
   onMount,
   createEffect,
+  Show,
 } from "solid-js";
 import { File } from "../File/File";
 import {
@@ -52,7 +53,7 @@ const Editor: Component<EditorProps> = (props) => {
   document.addEventListener("keydown", (e) => {
     if (e.ctrlKey && e.key === "s") {
       e.preventDefault();
-      if(props.editorStructure.active){
+      if (props.editorStructure.active) {
         let activeFile = {
           ...editorController.getActiveFile(props.editorStructure.id),
         };
@@ -61,7 +62,6 @@ const Editor: Component<EditorProps> = (props) => {
           editorController.setFile(props.editorStructure.id, activeFile);
         }
         treeController.save(activeFile);
-        console.log("CTRL + S");
       }
     }
   });
@@ -72,14 +72,15 @@ const Editor: Component<EditorProps> = (props) => {
   });
 
   createEffect((prev: FileStruct) => {
-    let activeFile = editorController.getActiveFile(props.editorStructure.id);
-    if(prev && activeFile && prev.title !== activeFile.title){
-      activeFileContent.innerHTML =  activeFile.content;
-    }else if(!prev && activeFile) {
-      activeFileContent.innerHTML =  activeFile.content;
+    if (props.editorStructure) {
+      let activeFile = editorController.getActiveFile(props.editorStructure.id);
+      if (prev && activeFile && prev.title !== activeFile.title) {
+        activeFileContent.innerHTML = activeFile.content;
+      } else if (!prev && activeFile) {
+        activeFileContent.innerHTML = activeFile.content;
+      }
+      return activeFile;
     }
-    //console.log(activeFile);
-    return activeFile;
   });
 
   function onPaste(e: ClipboardEvent) {
@@ -104,7 +105,6 @@ const Editor: Component<EditorProps> = (props) => {
   }
 
   function onFileOver(e: DragEvent) {
-    console.log("OVER !");
     let overlapRect = overlapElement.getBoundingClientRect();
     let positionX = e.pageX - overlapRect.left;
     let positionY = e.pageY - overlapRect.top;
@@ -140,7 +140,6 @@ const Editor: Component<EditorProps> = (props) => {
       state.Left = true;
     } else {
       state.Right = true;
-      console.log("Right");
     }
     setOverLayout((old: OverLayout) => {
       return {
@@ -153,7 +152,6 @@ const Editor: Component<EditorProps> = (props) => {
   }
 
   function onDragLeave(e: DragEvent) {
-    console.log("LEAVE !");
     if (overLayout().OverlapContainer) {
       setOverLayout((old: OverLayout) => {
         return {
@@ -181,7 +179,6 @@ const Editor: Component<EditorProps> = (props) => {
     let tempFile = { ...editorController.getFile(sourceEditorId, fileName) };
     let finalTargetEditorId = targetEditorId;
     tempFile.active = true;
-    console.log(position);
     if (position !== "Full") {
       finalTargetEditorId = editorController.createEditor();
       layerController.addEditorLayout(
@@ -204,7 +201,6 @@ const Editor: Component<EditorProps> = (props) => {
   }
 
   function onFileDrop(e: DragEvent) {
-    console.log("DROP !");
     let position = "Full";
     if (overLayout().Left) {
       position = "Left";
@@ -248,7 +244,6 @@ const Editor: Component<EditorProps> = (props) => {
   }
 
   function onFileDragEnd(e: DragEvent) {
-    console.log("END !");
     setOverLayout((old: OverLayout) => {
       return {
         ...old,
@@ -301,35 +296,15 @@ const Editor: Component<EditorProps> = (props) => {
     editorController.setFile(props.editorStructure.id, activeFile);
   }
 
-  function onFocus(){
-    if(!props.editorStructure.active){
+  function onFocus() {
+    if (!props.editorStructure.active) {
       editorController.setActivatedEditor(props.editorStructure.id);
-      console.log("Editor " + props.editorStructure.id + " focused.");
     }
   }
 
+
   return (
     <div onDragEnd={onFileDragEnd} class={styles.Container}>
-      <div
-        ref={filesContainer}
-        onWheel={onWheel}
-        classList={{ [styles.Files]: true }}
-      >
-        <For each={props.editorStructure?.files}>
-          {(item: FileStruct, index: Accessor<number>) => (
-            <File fileStruct={item} editorStruct={props.editorStructure} />
-          )}
-        </For>
-        <div
-          onDragOver={onFilesDragHover}
-          onDrop={onFilesDragDrop}
-          ondragleave={onFilesDragleave}
-          classList={{
-            [styles.FilesHover]: true,
-            [styles.FilesHoverAvtive]: filesHover(),
-          }}
-        ></div>
-      </div>
       <div
         ref={overlapElement}
         onDragOver={onFileOver}
@@ -344,15 +319,35 @@ const Editor: Component<EditorProps> = (props) => {
           [styles.Right]: overLayout().Right,
         }}
       ></div>
-      <div
-        onDragOver={onFileOver}
-        ref={activeFileContent}
-        onPaste={onPaste}
-        class={styles.Editor}
-        contentEditable={true}
-        onInput={onContentChange}
-        onFocus={onFocus}
-      ></div>
+        <div
+          ref={filesContainer}
+          onWheel={onWheel}
+          classList={{ [styles.Files]: true }}
+        >
+          <For each={props.editorStructure?.files}>
+            {(item: FileStruct, index: Accessor<number>) => (
+              <File fileStruct={item} editorStruct={props.editorStructure} />
+            )}
+          </For>
+          <div
+            onDragOver={onFilesDragHover}
+            onDrop={onFilesDragDrop}
+            ondragleave={onFilesDragleave}
+            classList={{
+              [styles.FilesHover]: true,
+              [styles.FilesHoverAvtive]: filesHover(),
+            }}
+          ></div>
+        </div>
+        <div
+          onDragOver={onFileOver}
+          ref={activeFileContent}
+          onPaste={onPaste}
+          class={styles.Editor}
+          contentEditable={true}
+          onInput={onContentChange}
+          onFocus={onFocus}
+        ></div>
     </div>
   );
 };

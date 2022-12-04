@@ -44,7 +44,6 @@ export const TreeProvider: Component<TreeProviderProps> = (props) => {
     },
     setActivatedTreeElement: function (elementName: string): void {
       let activatedElement = this.getActivatedElement();
-      console.log(activatedElement)
       batch(() => {
         if(activatedElement){
           this.setTreeElement(activatedElement.name, "selected", false);
@@ -69,8 +68,6 @@ export const TreeProvider: Component<TreeProviderProps> = (props) => {
       return path;
     },
     save: function (file: FileStruct) {
-      console.log("save");
-      console.log(file.title);
       this.setTreeElement(file.title, "textContent", file.content);
       props.services.treeService.setTree(treeState);
     },

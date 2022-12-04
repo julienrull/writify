@@ -9,6 +9,16 @@
   width: 100%;
 }
 
+.NoEditor{
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #272727;
+  color: white;
+}
+
 .Horizontal {
   grid-auto-flow: column;
   grid-template-columns: var(--sidebarClamped) 1fr;

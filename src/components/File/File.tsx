@@ -15,14 +15,21 @@ export const File: Component<FileProps>= (props) => {
     const [, editorController] = useEditor();
     const [, layerController] = useLayer();
     const [, treeController] = useTree();
-
+/*
+    document.documentElement.addEventListener('mouseleave', (event) => {
+           console.log("I'm out");
+           setIsOver(false);
+    });
+*/
     function onDragOver(e: DragEvent) {
         setIsOver(true);
+        console.log("File Over");
         e.preventDefault();
     }
 
     function onDragleave(e: DragEvent) {
         setIsOver(false);
+        console.log("File Leave");
         e.preventDefault();
     }
 
@@ -36,6 +43,12 @@ export const File: Component<FileProps>= (props) => {
             let targetEditorId = editorController.getEditor(props.editorStruct.id).id;
             console.log(targetEditorId);
             editorController.transferFilePosition(sourceFileName, targetFileName, sourceEditorId, targetEditorId);
+            let sourceEditor = editorController.getEditor(sourceEditorId);
+            if(sourceEditor.files.length === 0) {
+                console.log("Delete layout");
+                layerController.deleteLayout(sourceEditorId);
+                editorController.deleteEditor(sourceEditorId);
+            }
         }
         e.preventDefault();
     }
@@ -48,13 +61,29 @@ export const File: Component<FileProps>= (props) => {
     function onClose(e: MouseEvent) {
         editorController.closeFile(props.editorStruct.id, props.fileStruct.title);
         if (props.editorStruct.files.length === 0) {
+            console.log("delete file == 0");
           layerController.deleteLayout(props.editorStruct.id)
           editorController.deleteEditor(props.editorStruct.id);
+          let activeEditor = editorController.getActivatedEditor();
+          if(activeEditor) {
+            let activeFile = editorController.getActiveFile(editorController.getActivatedEditor().id);
+            treeController.setActivatedTreeElement(activeFile.title);
+          }else {
+            let activeTreeElement = treeController.getActivatedElement();
+            if(activeTreeElement){
+                treeController.setTreeElement(activeTreeElement.name, "selected", false);
+            }
+          }
+        }else{
+            console.log("delete file != 0");
+            let activeFile = editorController.getActiveFile(props.editorStruct.id);
+            treeController.setActivatedTreeElement(activeFile.title);
         }
         e.stopPropagation();
     }
 
     function onDragStart(e: DragEvent) {
+        console.log("File Start");
         let newSourceFile = {...props.fileStruct};
         editorController.setFile(props.editorStruct.id, newSourceFile);
         if(e.dataTransfer) {

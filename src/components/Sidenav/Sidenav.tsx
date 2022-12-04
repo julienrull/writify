@@ -2,6 +2,7 @@ import styles from "./Sidenav.module.css";
 import { batch, Component, For, JSX, Show } from "solid-js";
 import { Tree, TreeController, TreeElement, useTree } from '../../application/TreeProvider';
 import { useEditor } from '../../application/EditorProvider';
+import { useLayer } from '../../application/LayerProvider';
 
 interface TreeProps {
   element: TreeElement;
@@ -9,9 +10,17 @@ interface TreeProps {
 
 export const File: Component<TreeProps> = (props) => {
   const [, treeController] = useTree();
-  const [, editorController] = useEditor();
+  const [editors, editorController] = useEditor();
+  const [, layoutController] = useLayer();
   function onClick() {
     treeController.setActivatedTreeElement(props.element.name);
+    if(editors.length === 0){
+      let editorId = editorController.createEditor();
+      layoutController.createRootEditor(
+        editorId,
+        "Full"
+      )
+    }
     editorController.inject(props.element);
   }
   return (

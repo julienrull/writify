@@ -50,32 +50,38 @@ export const EditorProvider: Component<EditorProviderProps> = (props) => {
         });
       },
       inject(file: TreeElement): void{
-        let activatedEditor = this.getActivatedEditor();
-        if(!activatedEditor){
-          activatedEditor = editors[0];
-        }
-        let fileStruct: FileStruct = {
-          title: file.name,
-          content: file.textContent ? file.textContent : "",
-          active: false,
-          saved: true
-        };
-        let isFileOpen = false;
-        editors.forEach((editor: EditorStruct) => {
-          let fs  = this.getFile(editor.id, file.name);
-          if(fs){
-            isFileOpen = true;
-            this.switchFile(editor.id, fs);
-            this.setActivatedEditor(editor.id);
+        if(editors.length > 0) {
+          let activatedEditor = this.getActivatedEditor();
+          if(!activatedEditor){
+            activatedEditor = editors[0];
           }
-        });
-        if(!isFileOpen){
-          this.addFile(activatedEditor.id, fileStruct);
-          this.switchFile(activatedEditor.id, fileStruct);
+          let fileStruct: FileStruct = {
+            title: file.name,
+            content: file.textContent ? file.textContent : "",
+            active: false,
+            saved: true
+          };
+          let isFileOpen = false;
+          editors.forEach((editor: EditorStruct) => {
+            let fs  = this.getFile(editor.id, file.name);
+            if(fs){
+              isFileOpen = true;
+              this.switchFile(editor.id, fs);
+              this.setActivatedEditor(editor.id);
+            }
+          });
+          if(!isFileOpen){
+            this.addFile(activatedEditor.id, fileStruct);
+            this.switchFile(activatedEditor.id, fileStruct);
+          }
         }
       },
       deleteEditor(editorId: string): void {
         setEditors(editors.filter((editor) => editor.id !== editorId));
+        let activeEditor = this.getActivatedEditor();
+        if(activeEditor){
+          this.setActivatedEditor(activeEditor.id);
+        }
       },
       createEditor(): string {
         const newEditorId = generateRandomString(5);
@@ -83,7 +89,7 @@ export const EditorProvider: Component<EditorProviderProps> = (props) => {
           produce((editors) =>
             editors.push({
               id: newEditorId,
-              active: false,
+              active: true,
               files: [],
             })
           )
@@ -116,8 +122,6 @@ export const EditorProvider: Component<EditorProviderProps> = (props) => {
               files.filter((file) => file.title !== fileName)
           );
           if (file.active) {
-            console.log("wasActive");
-            console.log(fileIndex);
             setEditors(
               (editor) => editor.id === editorId,
               "files",
@@ -201,7 +205,6 @@ export const EditorProvider: Component<EditorProviderProps> = (props) => {
         targetEditorId: string
       ) {
         batch(() => {
-          console.log("CHANGE ENTER");
           if (sourceEditorId === targetEditorId) {
             let editor = this.getEditor(sourceEditorId);
             const sourceFile = this.getFile(sourceEditorId, sourceFileName);
@@ -214,7 +217,6 @@ export const EditorProvider: Component<EditorProviderProps> = (props) => {
               changeElementPosition(editor.files, sourceIndex, targetIndex)
             );
           } else {
-            console.log("CHANGE DIFF EDITORS");
             let targetEditor = this.getEditor(targetEditorId);
             const sourceFile = this.getFile(sourceEditorId, sourceFileName);
             const targetFile = this.getFile(targetEditorId, targetFileName);
@@ -245,9 +247,6 @@ export const EditorProvider: Component<EditorProviderProps> = (props) => {
             );
           }
         });
-        if (this.getEditor(sourceEditorId).files.length === 0) {
-          this.deleteEditor(sourceEditorId);
-        }
       },
     },
   ];

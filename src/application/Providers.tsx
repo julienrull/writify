@@ -55,15 +55,9 @@ export const Providers: Component<ProvidersProps> = (props) => {
   if (!editorStore) {
     editorStore = [
       {
-        id: "test1",
-        files: [
-          {
-            title: "Test",
-            content: "This is a test file",
-            active: true,
-            saved: true
-          },
-        ],
+        id: "rootEditor",
+        active: true,
+        files: [],
       },
     ];
   }
@@ -75,7 +69,7 @@ export const Providers: Component<ProvidersProps> = (props) => {
       type: LayoutType.PANEL,
       position: "100px",
       direction: Direction.NO_SPLIT,
-      children: [{ id: "test1", type: LayoutType.EDITOR }],
+      children: [{ id: "rootEditor", type: LayoutType.EDITOR }],
     };
   }
   return (
