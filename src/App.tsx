@@ -7,6 +7,7 @@ import { Sidenav } from './components/Sidenav/Sidenav';
 import { Direction, Panel } from './components/Panel/Panel';
 import { LayoutType } from './application/LayerProvider';
 import { SidebarPanel } from './components/SidebarPanel/SidebarPanel';
+import ContextMenu from './components/ContextMenu/ContextMenu';
 
 
 const layout= {
@@ -20,10 +21,12 @@ const App: Component = () => {
   return (
     <div class={styles.App}>
       <Providers services={services}>
-        <SidebarPanel layout={layout} >
-          <Sidenav/>
-          <Supervisor/>
-        </SidebarPanel>
+        <ContextMenu>
+          <SidebarPanel layout={layout} >
+            <Sidenav/>
+            <Supervisor/>
+          </SidebarPanel>
+        </ContextMenu>
       </Providers>
     </div>
   );
