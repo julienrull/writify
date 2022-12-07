@@ -1,27 +1,16 @@
 import styles from "./Sidenav.module.css";
 import { batch, Component, For, JSX, Show } from "solid-js";
-import { Tree, TreeController, TreeElement, useTree } from '../../application/TreeProvider';
-import { useEditor } from '../../application/EditorProvider';
-import { useLayer } from '../../application/LayerProvider';
+import { Tree, TreeElement, useTree } from '../../application/TreeProvider';
+import { useApp } from '../../application/AppProvider';
 
 interface TreeProps {
   element: TreeElement;
 }
 
 export const File: Component<TreeProps> = (props) => {
-  const [, treeController] = useTree();
-  const [editors, editorController] = useEditor();
-  const [, layoutController] = useLayer();
+  const [, appController] = useApp();
   function onClick() {
-    treeController.setActivatedTreeElement(props.element.name);
-    if(editors.length === 0){
-      let editorId = editorController.createEditor();
-      layoutController.createRootEditor(
-        editorId,
-        "Full"
-      )
-    }
-    editorController.inject(props.element);
+    appController.injectTreeFile(props.element);
   }
   return (
     <li
@@ -37,16 +26,9 @@ export const File: Component<TreeProps> = (props) => {
 };
 
 export const Folder: Component<TreeProps> = (props) => {
-  const [, treeController] = useTree();
+  const [, appController] = useApp();
   function onClick() {
-    batch(() => {
-      treeController.setActivatedTreeElement(props.element.name);
-      treeController.setTreeElement(
-        props.element.name,
-        "isOpen",
-        !props.element.isOpen
-      );
-    });
+    appController.activateTreeFolder(props.element);
   }
   return (
     <li>
@@ -91,7 +73,7 @@ interface SidenavProps {
   children?: any;
 }
 export const Sidenav: Component<SidenavProps> = () => {
-  const [tree, treeController] = useTree();
+  const [tree,] = useTree();
   return (
     <nav class={styles.Nav}>
       <div class={styles.Explorer}>EXPLORER</div>

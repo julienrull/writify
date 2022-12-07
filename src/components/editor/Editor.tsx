@@ -16,6 +16,7 @@ import {
 } from "../../application/EditorProvider";
 import { useLayer } from "../../application/LayerProvider";
 import { useTree } from "../../application/TreeProvider";
+import { AppController, useApp } from '../../application/AppProvider';
 
 interface OverLayout {
   OverlapContainer: boolean;
@@ -36,8 +37,7 @@ const Editor: Component<EditorProps> = (props) => {
   let overlapElement: HTMLDivElement = document.createElement("div");
 
   const [, editorController] = useEditor();
-  const [, layerController] = useLayer();
-  const [, treeController] = useTree();
+  const [, appController] = useApp();
 
   const [filesHover, setFilesHover] = createSignal(false);
 
@@ -53,16 +53,7 @@ const Editor: Component<EditorProps> = (props) => {
   document.addEventListener("keydown", (e) => {
     if (e.ctrlKey && e.key === "s") {
       e.preventDefault();
-      if (props.editorStructure.active) {
-        let activeFile = {
-          ...editorController.getActiveFile(props.editorStructure.id),
-        };
-        if (!activeFile.saved) {
-          activeFile.saved = true;
-          editorController.setFile(props.editorStructure.id, activeFile);
-        }
-        treeController.save(activeFile);
-      }
+      appController.saveFile(props.editorStructure.id);
     }
   });
 
@@ -87,14 +78,7 @@ const Editor: Component<EditorProps> = (props) => {
     e.preventDefault();
     var text = e.clipboardData?.getData("text/plain");
     document.execCommand("insertText", false, text);
-
-    let activeFile = {
-      ...editorController.getActiveFile(props.editorStructure.id),
-    };
-    if (activeFile.saved) {
-      activeFile.saved = false;
-      editorController.setFile(props.editorStructure.id, activeFile);
-    }
+    appController.changeEditorContent(props.editorStructure.id, text);
   }
 
   function onWheel(e: WheelEvent) {
@@ -170,36 +154,6 @@ const Editor: Component<EditorProps> = (props) => {
     e.preventDefault();
   }
 
-  function transferFile(
-    fileName: string,
-    sourceEditorId: string,
-    targetEditorId: string,
-    position: string
-  ) {
-    let tempFile = { ...editorController.getFile(sourceEditorId, fileName) };
-    let finalTargetEditorId = targetEditorId;
-    tempFile.active = true;
-    if (position !== "Full") {
-      finalTargetEditorId = editorController.createEditor();
-      layerController.addEditorLayout(
-        targetEditorId,
-        finalTargetEditorId,
-        position
-      );
-    }
-    editorController.transferFile(
-      fileName,
-      sourceEditorId,
-      finalTargetEditorId,
-      activeFileContent.innerHTML
-    );
-    editorController.setActivatedEditor(finalTargetEditorId);
-    if (editorController.getEditor(sourceEditorId).files.length === 0) {
-      layerController.deleteLayout(sourceEditorId);
-      editorController.deleteEditor(sourceEditorId);
-    }
-  }
-
   function onFileDrop(e: DragEvent) {
     let position = "Full";
     if (overLayout().Left) {
@@ -218,9 +172,10 @@ const Editor: Component<EditorProps> = (props) => {
         editorId !== props.editorStructure.id ||
         (editorId === props.editorStructure.id && position !== "Full")
       ) {
-        transferFile(
+        appController.transferFile(
           data.sourceFileName,
           editorId,
+          activeFileContent.innerHTML,
           props.editorStructure.id,
           position
         );
@@ -279,21 +234,14 @@ const Editor: Component<EditorProps> = (props) => {
       let sourceEditorId = data.sourceEditorId;
       let targetEditorId = props.editorStructure.id;
       if (sourceEditorId !== props.editorStructure.id) {
-        transferFile(sourceFileName, sourceEditorId, targetEditorId, "Full");
+        appController.transferFile(sourceFileName, sourceEditorId, activeFileContent.innerHTML, targetEditorId, "Full");
       }
     }
     e.preventDefault();
   }
 
-  function onContentChange(e: InputEvent) {
-    let activeFile = {
-      ...editorController.getActiveFile(props.editorStructure.id),
-    };
-    activeFile.content = activeFileContent.innerHTML;
-    if (activeFile.saved) {
-      activeFile.saved = false;
-    }
-    editorController.setFile(props.editorStructure.id, activeFile);
+  function onContentChange() {
+    appController.changeEditorContent(props.editorStructure.id, activeFileContent.innerHTML);
   }
 
   function onFocus() {

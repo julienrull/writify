@@ -17,6 +17,7 @@
   align-items: center;
   background-color: #272727;
   color: white;
+  user-select: none;
 }
 
 .Horizontal {

@@ -4,6 +4,7 @@ import { EditorProvider } from "./EditorProvider";
 import { LayerProvider, LayoutType } from "./LayerProvider";
 import services from "../infrastructure/services/index";
 import { Tree, TreeProvider } from "./TreeProvider";
+import { AppProvider } from './AppProvider';
 
 interface ProvidersProps {
   services: any;
@@ -76,7 +77,9 @@ export const Providers: Component<ProvidersProps> = (props) => {
       <TreeProvider  services={services} store={treeStore}>
         <EditorProvider services={services} store={editorStore}>
           <LayerProvider services={services} store={layoutStore}>
-            {props.children}
+            <AppProvider services={services} store={null}>
+              {props.children}
+            </AppProvider>
           </LayerProvider>
         </EditorProvider>
       </TreeProvider>
