@@ -7,7 +7,7 @@ import { Sidenav } from './components/Sidenav/Sidenav';
 import { Direction, Panel } from './components/Panel/Panel';
 import { LayoutType } from './application/LayerProvider';
 import { SidebarPanel } from './components/SidebarPanel/SidebarPanel';
-import ContextMenu from './components/ContextMenu/ContextMenu';
+import {ContextMenu} from './components/ContextMenu/ContextMenu';
 
 
 const layout= {

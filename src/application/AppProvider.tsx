@@ -6,7 +6,7 @@ import {
   batch,
 } from "solid-js";
 import { createStore } from "solid-js/store";
-import { FileStruct, useEditor, EditorStruct } from "./EditorProvider";
+import { FileStruct, useEditor, EditorStruct } from './EditorProvider';
 import { useLayer } from "./LayerProvider";
 import { useTree, TreeElement } from './TreeProvider';
 
@@ -42,7 +42,8 @@ export interface AppController {
   ): void;
   saveFile(editorId: string): void;
   injectTreeFile(element: TreeElement): void;
-  activateTreeFolder(element: TreeElement):void
+  activateTreeFolder(element: TreeElement):void;
+  delete(treeElementName: string): void;
 }
 
 interface AppProviderProps {
@@ -190,6 +191,19 @@ export const AppProvider: Component<AppProviderProps> = (props) => {
           !element.isOpen
         );
       });
+    },
+    delete(treeElementName: string): void{
+      // * If it's a file, close it
+      editorsStates.forEach((editor: EditorStruct) => {
+        editor.files.forEach((file: FileStruct) => {
+          if(file.title === treeElementName){
+            this.closeFile(editor.id, file.title);
+          }
+        });
+      });
+      // * Delete tree element
+      // * For a file
+      
     }
   };
   const app: [any, AppController] = [appState, controller];

@@ -3,6 +3,7 @@ import crossWhite from "../../assets/close_white.png";
 import { Component, createSignal } from "solid-js";
 import { FileStruct, EditorStruct } from "../../application/EditorProvider";
 import { useApp } from "../../application/AppProvider";
+import { useContextMenu } from '../ContextMenu/ContextMenu';
 
 interface FileProps {
   fileStruct: FileStruct;
@@ -11,10 +12,16 @@ interface FileProps {
 export const File: Component<FileProps> = (props) => {
   const [_isOver, setIsOver] = createSignal<boolean>(false);
   const [, appController] = useApp();
+  const [data, setData] = useContextMenu();
   function onDragOver(e: DragEvent) {
     setIsOver(true);
     console.log("File Over");
     e.preventDefault();
+  }
+
+  function onRightClick(event: MouseEvent) {
+    console.log("onRightClick")
+    setData(props.fileStruct);
   }
 
   function onDragleave(e: DragEvent) {
@@ -68,6 +75,7 @@ export const File: Component<FileProps> = (props) => {
   }
   return (
     <div
+      onContextMenu={onRightClick}
       onDragEnd={onDragEnd}
       onDragOver={onDragOver}
       draggable={true}

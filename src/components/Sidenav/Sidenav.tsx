@@ -2,9 +2,10 @@ import styles from "./Sidenav.module.css";
 import openArrow from '../../assets/bottom_white.png'
 import closeArrow from '../../assets/right_white.png'
 import files from '../../assets/files.png'
-import { batch, Component, For, JSX, Show, onMount } from 'solid-js';
+import { Component, For, JSX, Show, onMount } from 'solid-js';
 import { Tree, TreeElement, useTree } from '../../application/TreeProvider';
 import { useApp } from '../../application/AppProvider';
+import { useContextMenu } from "../ContextMenu/ContextMenu";
 
 interface TreeProps {
   index: number;
@@ -13,16 +14,22 @@ interface TreeProps {
 
 export const File: Component<TreeProps> = (props) => {
   const [, appController] = useApp();
+  const [, setData] = useContextMenu();
   let treeElementHtml = document.createElement("div");
   onMount(() => {
     treeElementHtml.style.setProperty('--indexPadding', props.index * 20 + "px");
   });
+  function onRightClick(event: MouseEvent) {
+    console.log("onRightClick")
+    setData(props.element);
+  }
   function onClick() {
     appController.injectTreeFile(props.element);
   }
   return (
     <div
       ref={treeElementHtml}
+      onContextMenu={onRightClick}
       onClick={onClick}
       classList={{
         [styles.TreeElement]: true,
@@ -37,10 +44,15 @@ export const File: Component<TreeProps> = (props) => {
 
 export const Folder: Component<TreeProps> = (props) => {
   const [, appController] = useApp();
+  const [, setData] = useContextMenu();
   let treeElementHtml = document.createElement("div");
   onMount(() => {
     treeElementHtml.style.setProperty('--indexPadding', props.index * 20 + "px");
   });
+  function onRightClick(event: MouseEvent) {
+    console.log("onRightClick")
+    setData(props.element);
+  }
   function onClick() {
     appController.activateTreeFolder(props.element);
   }
@@ -53,6 +65,7 @@ export const Folder: Component<TreeProps> = (props) => {
           [styles.TitleDisable]: !props.element.selected,
           [styles.TitleEnable]: props.element.selected,
         }}
+        onContextMenu={onRightClick}
         onClick={onClick}
       >
         <span>
