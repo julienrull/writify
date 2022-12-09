@@ -55,7 +55,6 @@ const Panel: Component<PanelProps> = (props) => {
     }
 
     onMount(() => {
-        console.log(props.layout);
         container.style.setProperty('--sidebar', props.layout.position + 'px');
         resize(resizer, throttled(function(x) {
             setPos(x);

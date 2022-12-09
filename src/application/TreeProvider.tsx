@@ -25,6 +25,7 @@ export interface TreeController {
   save(file: FileStruct): void;
   getTreeElementsPath(tr: TreeElement, prop: string, value: any): TreeElement[];
   setTreeElement(name: string, prop: string, value: any): void;
+  deleteTreeElement(elementName: string): void;
 }
 
 interface TreeProviderProps {
@@ -146,6 +147,9 @@ export const TreeProvider: Component<TreeProviderProps> = (props) => {
       });
       setTree.apply(null, setPath);
     },
+    deleteTreeElement(elementName: string): void {
+      
+    }
   };
   const tree: [TreeElement, TreeController] = [treeState, controller];
   return (

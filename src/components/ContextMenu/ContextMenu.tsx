@@ -21,8 +21,8 @@ export const ContextMenu: Component<ContextMenuProps> = (props) => {
   const commands = {
     DELETE: {
       "label": "Delete",
-      "command":(fileName: string) => {
-        appController.delete(fileName);
+      "command":(fileName: string, type: Tree) => {
+        appController.delete(fileName, type);
         console.log(fileName + " has been deleted !");
       },
     },
@@ -34,7 +34,8 @@ export const ContextMenu: Component<ContextMenuProps> = (props) => {
     },
     NEW_FILE: {
       "label": "New File...",
-      "command": () => {
+      "command": (folderName: string) => {
+        appController.newTreeElement(folderName);
         console.log("A file has been created !");
       },
     },
@@ -59,22 +60,26 @@ export const ContextMenu: Component<ContextMenuProps> = (props) => {
   function onElementClick(e: MouseEvent) {
     setShow(false);
     contextMenu.style.setProperty("--contextMenuShow", "none");
-    if (Object.keys(data()).length !== 0 && e.currentTarget && e.currentTarget instanceof HTMLDivElement) {
+    let element = data().length ? data()[0] : data();
+    if (Object.keys(element).length !== 0 && e.currentTarget && e.currentTarget instanceof HTMLDivElement) {
       const index: CommandType = e.currentTarget.id as CommandType;
       if (index === "DELETE") {
-        if (data().name) {
-          commands[index].command(data().name);
+        if (element.name) {
+          commands[index].command(element.name, element.type);
         }
       } else if (index === "RENAME") {
-        if (data().name) {
-          commands[index].command(data().name);
+        if (element) {
+          let [, setEdit] = data();
+          setEdit(true);
+          commands[index].command(element.name);
         }
       } else if (index === "NEW_FILE") {
-        if (data().name) {
-          commands[index].command();
+        let [element,] = data();
+        if (element.name) {
+          commands[index].command(element.name);
         }
       } else if (index === "NEW_FOLDER") {
-        if (data().name) {
+        if (element.name) {
           commands[index].command();
         }
       }
@@ -115,12 +120,13 @@ export const ContextMenu: Component<ContextMenuProps> = (props) => {
 
   function renderScheduler(): JSX.Element[] {
     let elements: JSX.Element[] = [];
-    if(Object.keys(data()).length !== 0) {
-      console.log(data().type);
-      if(data().type !== undefined){
-        if(data().type === Tree.FILE){
+    let element = data().length ? data()[0] : data();
+    if(Object.keys(element).length !== 0) {
+      console.log(element.type);
+      if(element.type !== undefined){
+        if(element.type === Tree.FILE){
           elements = renderContextMenu(["RENAME", "DELETE"]);
-        }else if(data().type === Tree.FOLDER){
+        }else if(element.type === Tree.FOLDER){
           elements = renderContextMenu(["NEW_FILE", "NEW_FOLDER","RENAME", "DELETE"]);
         }
       }

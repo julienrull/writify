@@ -6,9 +6,9 @@ import {
   batch,
 } from "solid-js";
 import { createStore } from "solid-js/store";
-import { FileStruct, useEditor, EditorStruct } from './EditorProvider';
+import { FileStruct, useEditor, EditorStruct } from "./EditorProvider";
 import { useLayer } from "./LayerProvider";
-import { useTree, TreeElement } from './TreeProvider';
+import { useTree, TreeElement } from "./TreeProvider";
 
 type TreeElementProps =
   | "name"
@@ -42,8 +42,11 @@ export interface AppController {
   ): void;
   saveFile(editorId: string): void;
   injectTreeFile(element: TreeElement): void;
-  activateTreeFolder(element: TreeElement):void;
-  delete(treeElementName: string): void;
+  activateTreeFolder(element: TreeElement): void;
+  delete(treeElementName: string, type: Tree): void;
+  getChildLeaf(element: TreeElement): string[];
+  renameTreeElement(oldTreeElementName: string, newTreeElementName: string): void;
+  newTreeElement(folderName: string): void;
 }
 
 interface AppProviderProps {
@@ -58,7 +61,7 @@ export const AppProvider: Component<AppProviderProps> = (props) => {
   const [appState, setAppState] = createStore<any>(props.store);
   const [editorsStates, editorController] = useEditor();
   const [, layoutController] = useLayer();
-  const [, treeController] = useTree();
+  const [treeState, treeController] = useTree();
 
   let controller: AppController = {
     closeFile(editorId: string, fileTabName: string): void {
@@ -113,12 +116,17 @@ export const AppProvider: Component<AppProviderProps> = (props) => {
       sourceEditorId: string,
       targetEditorId: string
     ): void {
-        editorController.transferFilePosition(sourceFileName, targetFileName, sourceEditorId, targetEditorId);
-        let sourceEditor = editorController.getEditor(sourceEditorId);
-        if(sourceEditor.files.length === 0) {
-            layoutController.deleteLayout(sourceEditorId);
-            editorController.deleteEditor(sourceEditorId);
-        }
+      editorController.transferFilePosition(
+        sourceFileName,
+        targetFileName,
+        sourceEditorId,
+        targetEditorId
+      );
+      let sourceEditor = editorController.getEditor(sourceEditorId);
+      if (sourceEditor.files.length === 0) {
+        layoutController.deleteLayout(sourceEditorId);
+        editorController.deleteEditor(sourceEditorId);
+      }
     },
     changeEditorContent(editorId: string, content: string): void {
       let activeFile = {
@@ -173,38 +181,96 @@ export const AppProvider: Component<AppProviderProps> = (props) => {
     },
     injectTreeFile(element: TreeElement): void {
       treeController.setActivatedTreeElement(element.name);
-      if(editorsStates.length === 0){
+      if (editorsStates.length === 0) {
         let editorId = editorController.createEditor();
-        layoutController.createRootEditor(
-          editorId,
-          "Full"
-        )
+        layoutController.createRootEditor(editorId, "Full");
       }
       editorController.inject(element);
     },
-    activateTreeFolder(element: TreeElement):void {
+    activateTreeFolder(element: TreeElement): void {
       batch(() => {
         treeController.setActivatedTreeElement(element.name);
-        treeController.setTreeElement(
-          element.name,
-          "isOpen",
-          !element.isOpen
-        );
+        treeController.setTreeElement(element.name, "isOpen", !element.isOpen);
       });
     },
-    delete(treeElementName: string): void{
+    getChildLeaf(element: TreeElement): string[] {
+      let elementsName: string[] = [];
+      if(element.children && element.type === Tree.FOLDER){
+        let subElementsName: string[] = [];
+        element.children.forEach((subElement: TreeElement) => {
+          if(subElement.type === Tree.FILE){
+            elementsName.push(subElement.name);
+          }else{
+            subElementsName = this.getChildLeaf(subElement);
+          }
+        });
+        elementsName = [...elementsName, ...subElementsName]
+      }else{
+        elementsName.push(element.name);
+      }
+      return elementsName;
+    },
+    delete(treeElementName: string, type: Tree): void {
+      const path: TreeElement[] = treeController.getTreePath(treeState, treeElementName);
+      // * Delete tree element
       // * If it's a file, close it
+      if(type === Tree.FILE) {
+        editorsStates.forEach((editor: EditorStruct) => {
+          editor.files.forEach((file: FileStruct) => {
+            if (file.title === treeElementName) {
+              this.closeFile(editor.id, file.title);
+            }
+          });
+        });
+      }else { // * If it's a Folder
+        let files: string[] = this.getChildLeaf(path[path.length - 1]);
+        batch(() => {
+          editorsStates.forEach((editor: EditorStruct) => {
+            editor.files.forEach((file: FileStruct) => {
+              if(files.includes(file.title)) {
+                this.closeFile(editor.id, file.title);
+              }
+            });
+          });
+        });
+      }
+
+      // * Delete tree element (for file and folder types)
+      if (path.length > 1) {
+        treeController.setTreeElement(
+          path[path.length - 2].name,
+          "children",
+          (elements: TreeElement[]) =>
+            elements.filter((element) => element.name !== treeElementName)
+        );
+      }
+    },
+    renameTreeElement(oldTreeElementName: string, newTreeElementName: string): void {
+      treeController.setTreeElement(oldTreeElementName, "name", newTreeElementName);
       editorsStates.forEach((editor: EditorStruct) => {
         editor.files.forEach((file: FileStruct) => {
-          if(file.title === treeElementName){
-            this.closeFile(editor.id, file.title);
+          if(file.title === oldTreeElementName){
+            let newFile = {...file}
+            newFile.title = newTreeElementName;
+            editorController.setFileV2(editor.id, oldTreeElementName, newFile);
           }
         });
       });
-      // * Delete tree element
-      // * For a file
-      
-    }
+    },
+    newTreeElement(folderName: string): void {
+      let newElement: TreeElement = {
+        name: "",
+        type: Tree.FILE,
+        selected: false,
+        textContent: "",
+      } 
+      treeController.setTreeElement(
+        folderName,
+        "children",
+        (elements: TreeElement[]) =>
+          [...elements, newElement]
+      );
+    },
   };
   const app: [any, AppController] = [appState, controller];
   return (

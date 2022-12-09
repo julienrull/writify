@@ -164,6 +164,14 @@ export const EditorProvider: Component<EditorProviderProps> = (props) => {
           file
         );
       },
+      setFileV2(editorId: string, fileName: string, file: FileStruct) {
+        setEditors(
+          (editor) => editor.id === editorId,
+          "files",
+          (fs: FileStruct) => fs.title === fileName,
+          file
+        );
+      },
       setFiles(editorId: string, files: FileStruct[]) {
         batch(() => {
           files.forEach((file) => {

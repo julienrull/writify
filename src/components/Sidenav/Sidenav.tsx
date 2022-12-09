@@ -2,7 +2,7 @@ import styles from "./Sidenav.module.css";
 import openArrow from '../../assets/bottom_white.png'
 import closeArrow from '../../assets/right_white.png'
 import files from '../../assets/files.png'
-import { Component, For, JSX, Show, onMount } from 'solid-js';
+import { Component, For, JSX, Show, onMount, createSignal, createEffect } from 'solid-js';
 import { Tree, TreeElement, useTree } from '../../application/TreeProvider';
 import { useApp } from '../../application/AppProvider';
 import { useContextMenu } from "../ContextMenu/ContextMenu";
@@ -15,17 +15,52 @@ interface TreeProps {
 export const File: Component<TreeProps> = (props) => {
   const [, appController] = useApp();
   const [, setData] = useContextMenu();
+  const [edit, setEdit] = createSignal<boolean>(false);
   let treeElementHtml = document.createElement("div");
+  let editInputHtml = document.createElement("input");
   onMount(() => {
     treeElementHtml.style.setProperty('--indexPadding', props.index * 20 + "px");
   });
+  createEffect(() => {
+    if(edit()) {
+      editInputHtml.focus();
+    }
+    if(props.element.name === "") {
+      setEdit(true);
+    }
+  });
   function onRightClick(event: MouseEvent) {
     console.log("onRightClick")
-    setData(props.element);
+    setData([props.element, setEdit]);
   }
   function onClick() {
     appController.injectTreeFile(props.element);
   }
+
+  function onKeydown (e: KeyboardEvent) {
+    console.log("keyPress");
+    if(e.currentTarget && e.currentTarget instanceof HTMLInputElement) {
+      if(e.key === "Escape") {
+        console.log("escape");
+        setEdit(false);
+     }else if(e.key === "Enter"){
+       console.log("enter");
+       appController.renameTreeElement(props.element.name, e.currentTarget.value);
+       setEdit(false);
+     }
+    }
+  }
+
+  function onFocusOut(e: FocusEvent) {
+    if(e.currentTarget && e.currentTarget instanceof HTMLInputElement) {
+      appController.renameTreeElement(props.element.name, e.currentTarget.value);
+      setEdit(false);
+      if(props.element.name === ""){
+        appController.delete("", props.element.type);
+      }
+    }
+  }
+
   return (
     <div
       ref={treeElementHtml}
@@ -37,24 +72,55 @@ export const File: Component<TreeProps> = (props) => {
         [styles.TitleEnable]: props.element.selected,
       }}
     >
-      <span><img width={14} height={14} src={files} style="margin-right: 5px" /> {props.element.name}</span>
+      <span>
+        <img width={14} height={14} src={files} style="margin-right: 5px" /> 
+        <Show when={!edit()} fallback={
+          <input ref={editInputHtml} name={props.element.name} value={props.element.name} onkeydown={onKeydown} onFocusOut={onFocusOut}/>
+        }>
+          {props.element.name}
+        </Show>
+        </span>
     </div>
   );
 };
 
 export const Folder: Component<TreeProps> = (props) => {
+  const [edit, setEdit] = createSignal<boolean>(false);
   const [, appController] = useApp();
   const [, setData] = useContextMenu();
   let treeElementHtml = document.createElement("div");
+  let editInputHtml = document.createElement("input");
   onMount(() => {
     treeElementHtml.style.setProperty('--indexPadding', props.index * 20 + "px");
   });
+  createEffect(() => {
+    if(edit()) {
+      editInputHtml.focus();
+    }
+  });
   function onRightClick(event: MouseEvent) {
     console.log("onRightClick")
-    setData(props.element);
+    setData([props.element, setEdit]);
   }
   function onClick() {
     appController.activateTreeFolder(props.element);
+  }
+  function onKeydown (e: KeyboardEvent) {
+    console.log("keyPress");
+    if(e.currentTarget && e.currentTarget instanceof HTMLInputElement) {
+      if(e.key === "Escape") {
+        console.log("escape");
+        setEdit(false);
+     }else if(e.key === "Enter"){
+       console.log("enter");
+       appController.renameTreeElement(props.element.name, e.currentTarget.value);
+       setEdit(false);
+     }
+    }
+  }
+
+  function onFocusOut() {
+    setEdit(false);
   }
   return (
     <div>
@@ -72,7 +138,11 @@ export const Folder: Component<TreeProps> = (props) => {
           <Show when={props.element.isOpen} fallback={<img width={14} height={14} src={closeArrow} style="margin-right: 5px" />}>
             <img width={14} height={14} src={openArrow} style="margin-right: 5px" />
           </Show>
+          <Show when={!edit()} fallback={
+          <input ref={editInputHtml} name={props.element.name} value={props.element.name} onkeydown={onKeydown} onFocusOut={onFocusOut}/>
+        }>
           {props.element.name}
+        </Show>
         </span>
       </div>
       <Show when={props.element.children && props.element.isOpen}>
