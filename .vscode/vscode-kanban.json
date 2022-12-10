@@ -1,0 +1,50 @@
+{
+  "Backlog": [],
+  "in-progress": [
+    {
+      "assignedTo": {
+        "name": "Julien Rull"
+      },
+      "category": "BACKLOG",
+      "creation_time": "2022-10-28T14:39:45.449Z",
+      "description": {
+        "content": "Espace et Fonctionnalités pour écrire du texte.",
+        "mime": "text/markdown"
+      },
+      "id": "1",
+      "prio": 2,
+      "references": [],
+      "title": "Editeur de textes"
+    },
+    {
+      "assignedTo": {
+        "name": "Julien Rull"
+      },
+      "category": "TASK",
+      "creation_time": "2022-10-28T22:45:46.560Z",
+      "description": {
+        "content": "Document.execCommand() est facile d'utilisation mais obsolète.\n\nIl faut créer son propre système avec l'API \"Range\":\nPo\nhttps://stackoverflow.com/questions/60581285/execcommand-is-now-obsolete-whats-the-alternative\nhttps://stackoverflow.com/questions/6328",
+        "mime": "text/markdown"
+      },
+      "id": "3",
+      "prio": 1,
+      "references": [],
+      "title": "Appliquer style sur sélection"
+    }
+  ],
+  "testing": [],
+  "done": [],
+  "todo": [
+    {
+      "assignedTo": {
+        "name": "Julien Rull"
+      },
+      "category": "BACKLOG",
+      "creation_time": "2022-10-28T16:21:04.538Z",
+      "id": "2",
+      "prio": 1,
+      "references": [],
+      "title": "Panel divisable et déplaçable"
+    }
+  ]
+}

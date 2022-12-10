@@ -1,0 +1,156 @@
+@import url('https://fonts.googleapis.com/css?family=Open+Sans');
+
+.Container{
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+.Commands{
+    width: 100%;
+    height: 50px;
+    background-color: gray;
+    display: none;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+.Files{
+    width: 100%;
+    height: 40px;
+    background-color: #1D1D1D;
+    display: flex;
+    flex-direction: row;
+    position: relative;
+    overflow-x: hidden;
+    overflow-y: hidden;
+    pointer-events:all;
+    z-index: 0;
+}
+
+.Files:hover{
+    overflow-x: auto;
+}
+
+.Files::-webkit-scrollbar{
+    height: 3px;
+    
+    transition: background-color 3s linear;
+}
+
+.Files::-webkit-scrollbar-button{
+    width: 1px;
+    height: 1px;
+}
+
+.Files::-webkit-scrollbar-thumb{
+    background-color: rgba(230, 230, 230, 0.2);
+}
+
+.Files::-webkit-scrollbar-thumb:active{
+    background-color: rgb(230, 230, 230);
+}
+
+.Files::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+ .FilesHover {
+    width: 100%;
+    height: 40px;
+    background-color: rgba(255, 255, 255, 0.1);
+    opacity: 0;
+}
+
+.FilesHoverAvtive {
+    opacity: 1;
+}
+
+.OverlapContainer{
+    position: absolute;
+    top: 40px;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    overflow: hidden;
+}
+
+.OverlapContainer::after{
+    content: '';
+    position: absolute;
+    background-color: rgba(255, 255, 255, 0.1);
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    transform: scale(100%, 50%) translate(0%, -50%);
+    transition: transform 0.1s linear;
+}
+
+
+
+.Right::after{
+    transform: scale(50%, 100%) translate(50%, 0%);
+}
+.Left::after{
+    transform: scale(50%, 100%) translate(-50%, 0%);
+}
+.Top::after{
+    transform: scale(100%, 50%) translate(0%, -50%);
+}
+.Bottom::after{
+    transform: scale(100%, 50%) translate(0%, 50%);
+}
+.Full::after{
+    transform: scale(100%, 100%) translate(0%, 0%);
+}
+
+
+
+.Editor{
+    background-color: #272727;
+    font-size: 27px;
+    font-family: "Open Sans";
+    color: #E6E6E6;
+    max-width: 100%;
+    height: calc(100% - 40px);
+    outline: none;
+    overflow-y: auto;
+    overflow-x: hidden;
+    box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    padding: 100px;
+    transition: background-color 0.3s;
+    text-rendering: optimizeSpeed;
+    word-wrap: break-word;
+    word-spacing: normal;
+}
+
+.Editor::-webkit-scrollbar{
+    width: 14px;
+}
+
+.Editor::-webkit-scrollbar-button{
+    width: 1px;
+    height: 1px;
+}
+
+.Editor::-webkit-scrollbar-thumb{
+    background-color: rgb(100,100,100);
+    border-width: 5px;
+    border-color: rgb(39,39,39);
+    border-style: solid;
+}
+
+.Editor::-webkit-scrollbar-thumb:hover{
+    background-color: #E6E6E6;
+    border-width: 3px;
+    cursor: default;
+}
+
+.Editor::-webkit-scrollbar-track {
+    background: transparent;
+}
