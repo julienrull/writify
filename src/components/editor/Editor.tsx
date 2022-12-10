@@ -31,7 +31,7 @@ export interface EditorProps {
   editorStructure: EditorStruct;
 }
 
-const Editor: Component<EditorProps> = (props) => {
+export const Editor: Component<EditorProps> = (props) => {
   let filesContainer: HTMLDivElement = document.createElement("div");
   let activeFileContent: HTMLDivElement = document.createElement("div");
   let overlapElement: HTMLDivElement = document.createElement("div");
@@ -299,5 +299,3 @@ const Editor: Component<EditorProps> = (props) => {
     </div>
   );
 };
-
-export { Editor };
