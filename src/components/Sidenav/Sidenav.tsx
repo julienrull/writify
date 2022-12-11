@@ -97,6 +97,9 @@ export const Folder: Component<TreeProps> = (props) => {
     if(edit()) {
       editInputHtml.focus();
     }
+    if(props.element.name === "") {
+      setEdit(true);
+    }
   });
   function onRightClick(event: MouseEvent) {
     console.log("onRightClick")

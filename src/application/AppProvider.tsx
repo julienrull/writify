@@ -2,7 +2,6 @@ import {
   createContext,
   useContext,
   Component,
-  createEffect,
   batch,
 } from "solid-js";
 import { createStore } from "solid-js/store";
@@ -46,7 +45,8 @@ export interface AppController {
   delete(treeElementName: string, type: Tree): void;
   getChildLeaf(element: TreeElement): string[];
   renameTreeElement(oldTreeElementName: string, newTreeElementName: string): void;
-  newTreeElement(folderName: string): void;
+  newTreeElement(folderName: string, type: Tree): void;
+  setFolderIsOpen(folderName: string, isOpen: boolean): void;
 }
 
 interface AppProviderProps {
@@ -193,6 +193,9 @@ export const AppProvider: Component<AppProviderProps> = (props) => {
         treeController.setTreeElement(element.name, "isOpen", !element.isOpen);
       });
     },
+    setFolderIsOpen(folderName: string, isOpen: boolean): void {
+      treeController.setTreeElement(folderName, "isOpen", isOpen);
+    },
     getChildLeaf(element: TreeElement): string[] {
       let elementsName: string[] = [];
       if(element.children && element.type === Tree.FOLDER){
@@ -257,12 +260,14 @@ export const AppProvider: Component<AppProviderProps> = (props) => {
         });
       });
     },
-    newTreeElement(folderName: string): void {
+    newTreeElement(folderName: string, type: Tree): void {
       let newElement: TreeElement = {
         name: "",
-        type: Tree.FILE,
+        type: type,
         selected: false,
+        isOpen: false,
         textContent: "",
+        children: []
       } 
       treeController.setTreeElement(
         folderName,

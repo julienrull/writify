@@ -38,6 +38,9 @@ const TreeContext = createContext<any[]>();
 
 export const TreeProvider: Component<TreeProviderProps> = (props) => {
   const [treeState, setTree] = createStore<TreeElement>(props.store);
+  createEffect(() => {
+    props.services.treeService.setTree(treeState);
+  });
   let controller: TreeController = {
     getActivatedElement: function (): TreeElement | undefined {
       let path = this.getTreeElementsPath(treeState, "selected", true)
