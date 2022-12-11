@@ -1,5 +1,5 @@
 .File{
-    min-width: 100px;
+    min-width: auto;
     height: 40px;
     color: #E6E6E6;
     display: flex;
@@ -9,6 +9,7 @@
     background-color: #1D1D1D;
     position: relative;
     z-index: 4 !important;
+    white-space: nowrap;
 }
 
 .FileChangedIndicator{

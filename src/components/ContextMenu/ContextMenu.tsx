@@ -35,13 +35,16 @@ export const ContextMenu: Component<ContextMenuProps> = (props) => {
     NEW_FILE: {
       "label": "New File...",
       "command": (folderName: string) => {
-        appController.newTreeElement(folderName);
+        appController.setFolderIsOpen(folderName, true);
+        appController.newTreeElement(folderName, Tree.FILE);
         console.log("A file has been created !");
       },
     },
     NEW_FOLDER: {
       "label": "New Folder...",
-      "command": () => {
+      "command": (folderName: string) => {
+        appController.setFolderIsOpen(folderName, true);
+        appController.newTreeElement(folderName, Tree.FOLDER);
         console.log("A folder has been created !");
       },
     },
@@ -74,13 +77,12 @@ export const ContextMenu: Component<ContextMenuProps> = (props) => {
           commands[index].command(element.name);
         }
       } else if (index === "NEW_FILE") {
-        let [element,] = data();
         if (element.name) {
           commands[index].command(element.name);
         }
       } else if (index === "NEW_FOLDER") {
         if (element.name) {
-          commands[index].command();
+          commands[index].command(element.name);
         }
       }
     }
