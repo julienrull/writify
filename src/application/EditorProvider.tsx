@@ -33,6 +33,10 @@ const editorContext = createContext<any[]>();
 
 export const EditorProvider: Component<EditorProviderProps> = (props) => {
   const [editors, setEditors] = createStore<EditorStruct[]>(props.store);
+  const editorsStore = props.services.editorService.getEditors();
+  if (editorsStore) {
+    setEditors(editorsStore);
+  }
   createEffect(() => {
     props.services.editorService.setEditors(editors);
   });

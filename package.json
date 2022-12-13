@@ -2,21 +2,25 @@
   "name": "vite-template-solid",
   "version": "0.0.0",
   "description": "",
+  "main": "main.js",
   "scripts": {
     "start": "vite",
     "dev": "vite",
     "build": "vite build",
-    "serve": "vite preview"
+    "serve": "vite preview",
+    "electron": "npm run build && npx electron ."
   },
   "license": "MIT",
   "devDependencies": {
     "@solidjs/testing-library": "^0.5.1",
+    "electron": "^22.0.0",
     "solid-devtools": "^0.20.1",
     "typescript": "^4.8.2",
     "vite": "^3.0.9",
     "vite-plugin-solid": "^2.3.0"
   },
   "dependencies": {
+    "@types/node": "^18.11.14",
     "solid-js": "^1.5.1"
   }
 }

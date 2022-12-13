@@ -249,6 +249,7 @@ export const AppProvider: Component<AppProviderProps> = (props) => {
       }
     },
     renameTreeElement(oldTreeElementName: string, newTreeElementName: string): void {
+      // TODO : Set file and children new path  
       treeController.setTreeElement(oldTreeElementName, "name", newTreeElementName);
       editorsStates.forEach((editor: EditorStruct) => {
         editor.files.forEach((file: FileStruct) => {
@@ -261,8 +262,10 @@ export const AppProvider: Component<AppProviderProps> = (props) => {
       });
     },
     newTreeElement(folderName: string, type: Tree): void {
+      const parentFolder = treeController.getTreePath(treeState, folderName).pop();
       let newElement: TreeElement = {
         name: "",
+        path: parentFolder.path + "/" + parentFolder.name,
         type: type,
         selected: false,
         isOpen: false,

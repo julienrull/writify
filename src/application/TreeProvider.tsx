@@ -1,4 +1,4 @@
-import { createContext, useContext, Component, createEffect, batch } from 'solid-js';
+import { createContext, useContext, Component, createEffect, batch, onMount } from 'solid-js';
 import { createStore } from "solid-js/store";
 import { FileStruct } from "./EditorProvider";
 
@@ -6,6 +6,7 @@ export interface TreeElement {
   name: string;
   type: Tree;
   selected: boolean;
+  path: string;
   isOpen?: boolean;
   textContent?: string;
   children?: TreeElement[];
@@ -38,6 +39,15 @@ const TreeContext = createContext<any[]>();
 
 export const TreeProvider: Component<TreeProviderProps> = (props) => {
   const [treeState, setTree] = createStore<TreeElement>(props.store);
+
+  onMount(async () => {
+    const tree = await props.services.treeService.getTree();
+    if (tree) {
+      console.log(tree);
+      setTree(tree);
+    }
+  });
+
   createEffect(() => {
     props.services.treeService.setTree(treeState);
   });

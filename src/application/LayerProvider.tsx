@@ -32,6 +32,10 @@ const LayerContext = createContext<any[]>();
 
 export const LayerProvider: Component<LayerProviderProps> = (props) => {
   const [layouts, setLayout] = createStore<Layout>(props.store);
+  const layoutStore = props.services.layoutService.getLayout();
+  if (layoutStore) {
+    setLayout(layoutStore);
+  }
   createEffect(() => {
     props.services.layoutService.setLayout(layouts);
   });
