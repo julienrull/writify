@@ -81,9 +81,10 @@ export const TreeProvider: Component<TreeProviderProps> = (props) => {
       }
       return path;
     },
-    save: function (file: FileStruct) {
+    save: async function (file: FileStruct) {
       this.setTreeElement(file.title, "textContent", file.content);
-      props.services.treeService.setTree(treeState);
+      const treeElement = this.getTreePath(treeState, file.title).pop();
+      await props.services.treeService.saveFolderFiles([treeElement]);
     },
     getTreeElementsPath: function (tr: TreeElement, prop: TreeElementProps, value: any): TreeElement[] {
       let path: TreeElement[] = [];

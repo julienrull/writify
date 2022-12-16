@@ -50,10 +50,10 @@ export const Editor: Component<EditorProps> = (props) => {
     Full: false,
   });
 
-  document.addEventListener("keydown", (e) => {
+  document.addEventListener("keydown", async (e) => {
     if (e.ctrlKey && e.key === "s") {
       e.preventDefault();
-      appController.saveFile(props.editorStructure.id);
+      await appController.saveFile(props.editorStructure.id);
     }
   });
 

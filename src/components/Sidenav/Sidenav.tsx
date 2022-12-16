@@ -37,7 +37,7 @@ export const File: Component<TreeProps> = (props) => {
     appController.injectTreeFile(props.element);
   }
 
-  function onKeydown (e: KeyboardEvent) {
+  async function onKeydown (e: KeyboardEvent) {
     console.log("keyPress");
     if(e.currentTarget && e.currentTarget instanceof HTMLInputElement) {
       if(e.key === "Escape") {
@@ -45,18 +45,26 @@ export const File: Component<TreeProps> = (props) => {
         setEdit(false);
      }else if(e.key === "Enter"){
        console.log("enter");
-       appController.renameTreeElement(props.element.name, e.currentTarget.value);
+       if(props.element.name !== "") {
+        await appController.renameTreeElement(props.element.name, e.currentTarget.value, false);
+       }else {
+        await appController.renameTreeElement(props.element.name, e.currentTarget.value, true);
+       }
        setEdit(false);
      }
     }
   }
 
-  function onFocusOut(e: FocusEvent) {
+  async function onFocusOut(e: FocusEvent) {
     if(e.currentTarget && e.currentTarget instanceof HTMLInputElement) {
-      appController.renameTreeElement(props.element.name, e.currentTarget.value);
+      if(props.element.name !== "") {
+        await appController.renameTreeElement(props.element.name, e.currentTarget.value, false);
+       }else {
+        await appController.renameTreeElement(props.element.name, e.currentTarget.value, true);
+       }
       setEdit(false);
       if(props.element.name === ""){
-        appController.delete("", props.element.type);
+        await appController.delete("", props.element.type);
       }
     }
   }
@@ -108,7 +116,7 @@ export const Folder: Component<TreeProps> = (props) => {
   function onClick() {
     appController.activateTreeFolder(props.element);
   }
-  function onKeydown (e: KeyboardEvent) {
+  async function onKeydown (e: KeyboardEvent) {
     console.log("keyPress");
     if(e.currentTarget && e.currentTarget instanceof HTMLInputElement) {
       if(e.key === "Escape") {
@@ -116,7 +124,12 @@ export const Folder: Component<TreeProps> = (props) => {
         setEdit(false);
      }else if(e.key === "Enter"){
        console.log("enter");
-       appController.renameTreeElement(props.element.name, e.currentTarget.value);
+       if(props.element.name !== "") {
+        await appController.renameTreeElement(props.element.name, e.currentTarget.value, false);
+       }else {
+        await appController.renameTreeElement(props.element.name, e.currentTarget.value, true);
+       }
+       
        setEdit(false);
      }
     }

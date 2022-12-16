@@ -44,7 +44,7 @@ export interface AppController {
   activateTreeFolder(element: TreeElement): void;
   delete(treeElementName: string, type: Tree): void;
   getChildLeaf(element: TreeElement): string[];
-  renameTreeElement(oldTreeElementName: string, newTreeElementName: string): void;
+  renameTreeElement(oldTreeElementName: string, newTreeElementName: string, isNewElement: boolean): void;
   newTreeElement(folderName: string, type: Tree): void;
   setFolderIsOpen(folderName: string, isOpen: boolean): void;
 }
@@ -175,8 +175,8 @@ export const AppProvider: Component<AppProviderProps> = (props) => {
         if (!activeFile.saved) {
           activeFile.saved = true;
           editorController.setFile(editor.id, activeFile);
+          treeController.save(activeFile);
         }
-        treeController.save(activeFile);
       }
     },
     injectTreeFile(element: TreeElement): void {
@@ -213,7 +213,7 @@ export const AppProvider: Component<AppProviderProps> = (props) => {
       }
       return elementsName;
     },
-    delete(treeElementName: string, type: Tree): void {
+    async delete(treeElementName: string, type: Tree): Promise<void> {
       const path: TreeElement[] = treeController.getTreePath(treeState, treeElementName);
       // * Delete tree element
       // * If it's a file, close it
@@ -247,10 +247,19 @@ export const AppProvider: Component<AppProviderProps> = (props) => {
             elements.filter((element) => element.name !== treeElementName)
         );
       }
+      await props.services.treeService.deleteFolderOrFile(path.pop());
     },
-    renameTreeElement(oldTreeElementName: string, newTreeElementName: string): void {
-      // TODO : Set file and children new path  
+    async renameTreeElement(oldTreeElementName: string, newTreeElementName: string, isNewElement: boolean): Promise<void> {
       treeController.setTreeElement(oldTreeElementName, "name", newTreeElementName);
+      const element: TreeElement = treeController.getTreePath(treeState, newTreeElementName).pop();
+      let oldPath = element.path;
+      if(element.type === Tree.FOLDER && element.children) {
+        element.children.forEach((subElement: TreeElement) => {
+          batch(() => {
+            treeController.setTreeElement(subElement.name, "path", element.path + "/" + element.name + "/");
+          });
+        });
+      }
       editorsStates.forEach((editor: EditorStruct) => {
         editor.files.forEach((file: FileStruct) => {
           if(file.title === oldTreeElementName){
@@ -260,12 +269,17 @@ export const AppProvider: Component<AppProviderProps> = (props) => {
           }
         });
       });
+      if(isNewElement){
+        await props.services.treeService.saveFolderFiles([element]);
+      }else{
+        await props.services.treeService.renameFolderOrFile(oldTreeElementName, newTreeElementName, oldPath);
+      }
     },
-    newTreeElement(folderName: string, type: Tree): void {
+    async newTreeElement(folderName: string, type: Tree): Promise<void> {
       const parentFolder = treeController.getTreePath(treeState, folderName).pop();
       let newElement: TreeElement = {
         name: "",
-        path: parentFolder.path + "/" + parentFolder.name,
+        path: parentFolder.path  + "/" + parentFolder.name + "/",
         type: type,
         selected: false,
         isOpen: false,

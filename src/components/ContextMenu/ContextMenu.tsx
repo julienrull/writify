@@ -21,8 +21,8 @@ export const ContextMenu: Component<ContextMenuProps> = (props) => {
   const commands = {
     DELETE: {
       "label": "Delete",
-      "command":(fileName: string, type: Tree) => {
-        appController.delete(fileName, type);
+      "command": async (fileName: string, type: Tree) => {
+        await appController.delete(fileName, type);
         console.log(fileName + " has been deleted !");
       },
     },
@@ -34,17 +34,17 @@ export const ContextMenu: Component<ContextMenuProps> = (props) => {
     },
     NEW_FILE: {
       "label": "New File...",
-      "command": (folderName: string) => {
+      "command": async (folderName: string) => {
         appController.setFolderIsOpen(folderName, true);
-        appController.newTreeElement(folderName, Tree.FILE);
+        await appController.newTreeElement(folderName, Tree.FILE);
         console.log("A file has been created !");
       },
     },
     NEW_FOLDER: {
       "label": "New Folder...",
-      "command": (folderName: string) => {
+      "command": async (folderName: string) => {
         appController.setFolderIsOpen(folderName, true);
-        appController.newTreeElement(folderName, Tree.FOLDER);
+        await appController.newTreeElement(folderName, Tree.FOLDER);
         console.log("A folder has been created !");
       },
     },
@@ -60,7 +60,7 @@ export const ContextMenu: Component<ContextMenuProps> = (props) => {
     e.preventDefault();
   }
 
-  function onElementClick(e: MouseEvent) {
+  async function onElementClick(e: MouseEvent) {
     setShow(false);
     contextMenu.style.setProperty("--contextMenuShow", "none");
     let element = data().length ? data()[0] : data();
@@ -68,7 +68,7 @@ export const ContextMenu: Component<ContextMenuProps> = (props) => {
       const index: CommandType = e.currentTarget.id as CommandType;
       if (index === "DELETE") {
         if (element.name) {
-          commands[index].command(element.name, element.type);
+          await commands[index].command(element.name, element.type);
         }
       } else if (index === "RENAME") {
         if (element) {
@@ -78,11 +78,11 @@ export const ContextMenu: Component<ContextMenuProps> = (props) => {
         }
       } else if (index === "NEW_FILE") {
         if (element.name) {
-          commands[index].command(element.name);
+          await commands[index].command(element.name);
         }
       } else if (index === "NEW_FOLDER") {
         if (element.name) {
-          commands[index].command(element.name);
+          await commands[index].command(element.name);
         }
       }
     }
