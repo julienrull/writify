@@ -2,3 +2,4 @@
 <h1 align="center">WRITIFY</h1>
 <p align="center">Lightweight and flexible writing app.</p>
 <p align="center"><a href="https://julienrull.github.io/writify/"><strong>Demo</strong></a> (prototype)</p>
+<img src="panelsDemo.gif" alt="panels demo gif">
