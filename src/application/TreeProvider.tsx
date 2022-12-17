@@ -27,6 +27,7 @@ export interface TreeController {
   getTreeElementsPath(tr: TreeElement, prop: string, value: any): TreeElement[];
   setTreeElement(name: string, prop: string, value: any): void;
   deleteTreeElement(elementName: string): void;
+  setTree(treeElement: TreeElement): void;
 }
 
 interface TreeProviderProps {
@@ -52,6 +53,9 @@ export const TreeProvider: Component<TreeProviderProps> = (props) => {
     props.services.treeService.setTree(treeState);
   });
   let controller: TreeController = {
+    setTree(treeElement: TreeElement): void {
+      setTree(treeElement);
+    },
     getActivatedElement: function (): TreeElement | undefined {
       let path = this.getTreeElementsPath(treeState, "selected", true)
       return path[path.length - 1];

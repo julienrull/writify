@@ -65,9 +65,9 @@ export default class TreeService {
     return tree;
   }
 
-  private async loadWorkspaceTree(): Promise<TreeElement | null> {
+  public async loadWorkspaceTree(path: string): Promise<TreeElement | null> {
     // @ts-ignore: Unreachable code error
-    const treeData = await window.versions.loadFolderFiles();
+    const treeData = await window.versions.loadFolderFiles(path);
 
     console.log(treeData);
 
@@ -90,7 +90,7 @@ export default class TreeService {
     let res = null;
     if (this.isElectron()) {
       console.log("YES");
-      res = this.loadWorkspaceTree();
+      res = this.loadWorkspaceTree('C:\\Users\\julie\\Desktop\\writifyWorkspace');
     } else {
       console.log("NO");
       const data = window.localStorage.getItem(this.endpoint);

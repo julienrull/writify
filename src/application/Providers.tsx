@@ -11,7 +11,7 @@ interface ProvidersProps {
   children: any;
 }
 export const Providers: Component<ProvidersProps> = (props) => {
-  const [treeStore, setTreeStore] = createSignal<TreeElement>({
+  const [treeStore, ] = createSignal<TreeElement>({
     name: "Workspace Folder",
         isOpen: true,
         path: "/",
@@ -19,8 +19,8 @@ export const Providers: Component<ProvidersProps> = (props) => {
         selected: false,
         children: []
   });
-  let [editorStore, setEditorStore] = createSignal<EditorStruct[]>([]);
-  let [layoutStore, setLayoutStore] = createSignal<Layout>({
+  let [editorStore, ] = createSignal<EditorStruct[]>([]);
+  let [layoutStore, ] = createSignal<Layout>({
     id: "root",
     type: LayoutType.PANEL,
     position: "100px",

@@ -108,7 +108,9 @@ export const EditorProvider: Component<EditorProviderProps> = (props) => {
       setEditor(editor: EditorStruct): void {
         setEditors((subEditor) => subEditor.id === editor.id, editor);
       },
-
+      clearEditors(): void {
+        setEditors((editors) => []);
+      },
       //* FILE
       closeFile(editorId: string, fileName: string): void {
         let fileIndex = -1;

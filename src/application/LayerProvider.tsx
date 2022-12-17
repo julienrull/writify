@@ -3,6 +3,7 @@ import {
   useContext,
   Component,
   batch,
+  children,
 } from "solid-js";
 import { createStore, produce } from "solid-js/store";
 import { Direction } from "../components/Panel/Panel";
@@ -42,6 +43,12 @@ export const LayerProvider: Component<LayerProviderProps> = (props) => {
   const layer = [
     layouts,
     {
+      clearLayout(): void {
+        batch(() => {
+          setLayout("children", []);
+          setLayout("direction", Direction.NO_SPLIT);
+        });
+      },
       getLayoutPath(layout: Layout, layoutId: string): Layout[] {
         let path: Layout[] = [];
         if (layout.children) {

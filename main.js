@@ -1,8 +1,8 @@
-const { app, BrowserWindow, ipcMain } = require('electron')
+const { app, BrowserWindow, ipcMain, dialog } = require('electron')
 const fs = require('fs');
 const path = require('path');
 
-const WORKSPACE = 'C:\\Users\\julie\\Desktop\\writifyWorkspace';
+let WORKSPACE = 'C:\\Users\\julie\\Desktop\\writifyWorkspace';
 
 function getWorkspacePath(){
   let workspace =  WORKSPACE.split("\\");
@@ -39,17 +39,25 @@ function loadFolderTree(treeElementName){
     let folder = fs.readdirSync(treeElementName);
     tree.type = "FOLDER";
     folder.forEach((elem) => {
-      tree.children = [...tree.children, loadFolderTree(treeElementName + "\\" + elem)];
+      let element = loadFolderTree(treeElementName + "\\" + elem);
+      if(element.type !== "UNKNOWN") {
+        tree.children = [...tree.children, element];
+      }
     });
   }else {
-    let fileData = fs.readFileSync(treeElementName, 'utf8');
-    tree.content = fileData.toString();
+    if(path.extname(treeElementName).toLocaleLowerCase() === ".txt" || path.extname(treeElementName).toLocaleLowerCase() === ".md") {
+      let fileData = fs.readFileSync(treeElementName, 'utf8');
+      tree.content = fileData.toString();
+    }else {
+      tree.type = "UNKNOWN";
+    }
   }
   return tree;
 }
 
-ipcMain.handle('loadFolderFiles', (event) => {
+ipcMain.handle('loadFolderFiles', (event, path) => {
   try{
+    WORKSPACE = path;
     return loadFolderTree(WORKSPACE);
   }catch(err){
     console.error(err);
@@ -103,7 +111,9 @@ ipcMain.handle('deleteFolderOrFile', (event, treeElementName, type, path) => {
     console.error(err);
   }
 });
-
+ipcMain.handle('dialog', (event, method, params) => {       
+  return dialog[method](params);
+});
 
 app.whenReady().then(() => {
   createWindow()
