@@ -2,7 +2,7 @@ const { app, BrowserWindow, ipcMain, dialog } = require('electron')
 const fs = require('fs');
 const path = require('path');
 
-let WORKSPACE = 'C:\\Users\\julie\\Desktop\\writifyWorkspace';
+let WORKSPACE = '';
 
 function getWorkspacePath(){
   let workspace =  WORKSPACE.split("\\");

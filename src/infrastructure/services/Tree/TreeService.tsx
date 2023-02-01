@@ -3,6 +3,8 @@ import { Tree, TreeElement } from "../../../application/TreeProvider";
 export default class TreeService {
   private endpoint = "tree";
 
+  private WORKSPACE = "workspace";
+
   public async deleteFolderOrFile(
     treeElement: TreeElement
   ): Promise<void> {
@@ -68,8 +70,9 @@ export default class TreeService {
   public async loadWorkspaceTree(path: string): Promise<TreeElement | null> {
     // @ts-ignore: Unreachable code error
     const treeData = await window.versions.loadFolderFiles(path);
-
-    console.log(treeData);
+    if(treeData) {
+      window.localStorage.setItem(this.WORKSPACE, path);
+    }
 
     let treeElement: TreeElement = this.electronTreeToAppTree(treeData, "/");
     return treeElement;
@@ -90,7 +93,12 @@ export default class TreeService {
     let res = null;
     if (this.isElectron()) {
       console.log("YES");
-      res = this.loadWorkspaceTree('C:\\Users\\julie\\Desktop\\writifyWorkspace');
+      const workspace = window.localStorage.getItem(this.WORKSPACE);
+      if(workspace){
+        res = this.loadWorkspaceTree(workspace);
+      }else {
+        res = this.loadWorkspaceTree('C:\\Users\\julie\\Desktop\\writifyWorkspace');
+      }
     } else {
       console.log("NO");
       const data = window.localStorage.getItem(this.endpoint);
