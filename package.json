@@ -1,22 +1,23 @@
 {
-  "name": "vite-template-solid",
+  "name": "writify",
   "version": "0.0.0",
-  "description": "",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
-    "start": "vite",
-    "dev": "vite",
-    "build": "vite build",
-    "serve": "vite preview"
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },
-  "license": "MIT",
   "devDependencies": {
-    "@solidjs/testing-library": "^0.5.1",
-    "solid-devtools": "^0.20.1",
-    "typescript": "^4.8.2",
-    "vite": "^3.0.9",
-    "vite-plugin-solid": "^2.3.0"
+    "turbo": "latest"
   },
-  "dependencies": {
-    "solid-js": "^1.5.1"
-  }
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "dependencies": {},
+  "packageManager": "pnpm@7.25.0"
 }
