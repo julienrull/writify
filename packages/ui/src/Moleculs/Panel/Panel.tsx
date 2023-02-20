@@ -1,6 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import "./panel.css";
-import { useState } from 'react';
+import styles from "./panel.module.css";
 
 
 
@@ -8,6 +7,7 @@ interface PanelProps {
         children: JSX.Element[],
         direction: 'horizontal' | 'vertical',
         handlePosition?: string,
+        handleLimit?: string,
 }
 
 /**
@@ -17,15 +17,21 @@ export const Panel = ({
         direction = 'horizontal',
         children,
         handlePosition,
+        handleLimit,
         ...props
 }: PanelProps) => {
         const panelElement: React.RefObject<HTMLTableSectionElement> = useRef<HTMLTableSectionElement>(null);
         useEffect(() => {
-                let position = '50%';
+                let position = children.length > 1 ? '50%' : '100%';
+                let limit = '1px';
                 if(handlePosition) {
                         position = handlePosition;
                 }
+                if(handleLimit) {
+                        limit = handleLimit;
+                }
                 panelElement.current?.style.setProperty("--handle-position", position);
+                panelElement.current?.style.setProperty("--handle-limit", limit);
         }, []);
         const onPanelHandleDown = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
                 e.preventDefault();
@@ -52,11 +58,11 @@ export const Panel = ({
                 document.addEventListener('pointerup', onPointerUp, {once: true});
         }
         return (
-                <section className={direction === 'horizontal' ? 'panel panel-horizontal' : 'panel panel-vertical'} ref={panelElement}>
+                <section className={direction === 'horizontal' ? styles.panel + ' ' + styles['panel-horizontal'] : styles.panel + ' ' + styles['panel-vertical']} ref={panelElement}>
                         <section>{children[0]}</section>
                         {children.length > 1 ? 
                         <section>
-                                <div className="panel-handle" onPointerDown={onPanelHandleDown}></div>
+                                <div className={styles['panel-handle']} onPointerDown={onPanelHandleDown}></div>
                                 {children[1]}
                         </section> : 
                         undefined
