@@ -1,5 +1,5 @@
 import "./grid.css";
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Panel } from '../../Moleculs/Panel/Panel';
 
 /* COMPONENT STATE */
@@ -8,25 +8,21 @@ export interface GridNode {
         weight: number,
         direction: "horizontal" | "vertical",
         data?: {
-                type: string,
-                content:{
+                component: string | React.ComponentType<any>,
+                props:{
                         [key: string]: any
                 }
         }
 }
 interface GridConfig {
-        renderer: Map<string, JSX.Element> | null,
         state: Map<GridNode, GridNode[]>;
 }
 interface GridProps {
-        config: GridConfig
+        config: GridConfig,
+        removeNode?: (node: GridNode) => void,
+        updateNode?: (node: GridNode) => void,
+        addNode?: (targetNode: GridNode, newNode: GridNode) => void,
 }
-
-/* COMPONENT UTILITIES */
-
-function addNode(){}
-function removeNode(){}
-function updateNode(){}
 
 
 /**
@@ -36,8 +32,13 @@ export const Grid = ({
         config,
         ...props
 }: GridProps) => {
-        // Créer une classe (un type) pour gérer les arbres
-        const [gridConfig, setGridConfig] = useState<GridConfig>();
+        function moveNode(sourceNode: GridNode, targetNode: GridNode){
+                if(props.removeNode && props.addNode){
+                        let movedNode = sourceNode;
+                        props.removeNode(sourceNode);
+                        props.addNode(targetNode, movedNode);
+                }
+        }
         function render(node: GridNode): JSX.Element[] {
                 let elements: JSX.Element[] = [];
                 let nodes = config.state.get(node); 
@@ -52,9 +53,13 @@ export const Grid = ({
                                 elements =[...elements, ...render(nd)];
                         });
                 }else{
-                        elements.push(
-                                <div key={node.weight + 1}>{node.type}</div>
-                        );
+                        let element = <></>;
+                        if(node.data) {
+                                let element = node.data.component;
+                                elements.push(
+                                        React.createElement(element, {key: node.weight + 1, ...node.data.props})
+                                );
+                        }
                 }
                 return [
                         <Panel key={node.weight} direction={node.direction} >

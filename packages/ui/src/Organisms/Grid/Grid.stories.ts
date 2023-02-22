@@ -17,7 +17,7 @@ let gridState = new Map<GridNode, GridNode[]>();
 let root: GridNode = {
         type: "ROOT",
         weight: 50,
-        direction: "horizontal",
+        direction: "vertical",
 }
 let A: GridNode = {
         type: "LEAF",
@@ -41,6 +41,12 @@ let D: GridNode = {
         type: "LEAF",
         weight: 65,
         direction: "horizontal",
+        data: {
+                component: "div",
+                props: {
+                        children: "Hello World"
+                }
+        }
 }
 
 gridState.set(root, [A, B]);

@@ -40,13 +40,13 @@ export const Panel = ({
                         if(direction === "horizontal") {
                                 let x = 0;
                                 if(parentRect){
-                                        x = e.pageX - parentRect?.x
+                                        x = e.clientX - parentRect?.left;
                                 }
                                 panelElement.current?.style.setProperty("--handle-position", x + "px");
                         }else {
                                 let y = 0;
                                 if(parentRect){
-                                        y = e.pageY - parentRect?.y
+                                        y = e.clientY - parentRect?.top;
                                 }
                                 panelElement.current?.style.setProperty("--handle-position", y + "px");
                         }
