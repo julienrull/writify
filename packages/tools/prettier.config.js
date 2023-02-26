@@ -1,3 +1,3 @@
 module.exports = {
-   // tabWidth: 8
+   //tabWidth: 4
 }
