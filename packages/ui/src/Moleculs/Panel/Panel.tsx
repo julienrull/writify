@@ -21,17 +21,24 @@ export const Panel = ({
         ...props
 }: PanelProps) => {
         const panelElement: React.RefObject<HTMLTableSectionElement> = useRef<HTMLTableSectionElement>(null);
+        let position = '50%';
+        let limit = '1px';
+        if(children.length < 2) {
+                panelElement.current?.style.setProperty("--handle-position", "100%");
+                panelElement.current?.style.setProperty("--handle-limit", '0px');
+        }
+        
         useEffect(() => {
-                let position = children.length > 1 ? '50%' : '100%';
-                let limit = '1px';
-                if(handlePosition) {
-                        position = handlePosition;
+                if(children.length > 1) {
+                        if(handlePosition) {
+                                position = handlePosition;
+                        }
+                        if(handleLimit) {
+                                limit = handleLimit;
+                        }
+                        panelElement.current?.style.setProperty("--handle-position", position);
+                        panelElement.current?.style.setProperty("--handle-limit", limit);
                 }
-                if(handleLimit) {
-                        limit = handleLimit;
-                }
-                panelElement.current?.style.setProperty("--handle-position", position);
-                panelElement.current?.style.setProperty("--handle-limit", limit);
         }, []);
         const onPanelHandleDown = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
                 e.preventDefault();

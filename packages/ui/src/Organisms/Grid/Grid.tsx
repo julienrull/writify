@@ -1,5 +1,5 @@
 import "./grid.css";
-import React, { useState } from 'react';
+import React from 'react';
 import { Panel } from '../../Moleculs/Panel/Panel';
 
 /* COMPONENT STATE */
@@ -14,11 +14,9 @@ export interface GridNode {
                 }
         }
 }
-interface GridConfig {
-        state: Map<GridNode, GridNode[]>;
-}
+
 interface GridProps {
-        config: GridConfig,
+        grid: Map<GridNode, GridNode[]>,
         removeNode?: (node: GridNode) => void,
         updateNode?: (node: GridNode) => void,
         addNode?: (targetNode: GridNode, newNode: GridNode) => void,
@@ -29,9 +27,10 @@ interface GridProps {
  * Primary UI component for user interaction
  */
 export const Grid = ({
-        config,
+        grid,
         ...props
 }: GridProps) => {
+        const root = getRoot();
         function moveNode(sourceNode: GridNode, targetNode: GridNode){
                 if(props.removeNode && props.addNode){
                         let movedNode = sourceNode;
@@ -39,9 +38,18 @@ export const Grid = ({
                         props.addNode(targetNode, movedNode);
                 }
         }
+        function getRoot(): GridNode | null {
+                let root = null;
+                for (let node of grid.keys()) {
+                        if(node.type === "ROOT"){
+                                root = node;
+                        }
+                 }
+                 return root;
+        }
         function render(node: GridNode): JSX.Element[] {
                 let elements: JSX.Element[] = [];
-                let nodes = config.state.get(node); 
+                let nodes = grid.get(node); 
                 if(nodes && node.type === "INTERNAL") {
                         nodes.forEach((nd, i) => {
                                 if(i > 0) {
@@ -69,7 +77,14 @@ export const Grid = ({
         }
         return (
                 <div className="grid">
-                        {render(config.state.keys().next().value)}
+                        <button onClick={() => {
+                                if(props.removeNode) {
+                                        if(root){
+                                                props.removeNode(root);
+                                        }
+                                }
+                        }}>remove</button>
+                        {root ? render(root) : undefined}
                 </div>
         );
 };
